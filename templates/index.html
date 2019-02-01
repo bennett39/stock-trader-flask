@@ -1,0 +1,107 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Portfolio
+{% endblock %}
+
+{% block main %}
+    <h1>Your Portfolio</h1>
+    <div class="table-responsive table-hover">
+        <table class="table">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Company</th>
+                    <th>Symbol</th>
+                    <th>Shares</th>
+                    <th>Price Bought</th>
+                    <th>Current Price</th>
+                    <th>Change</th>
+                    <th>Present Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in portfolio %}
+                <tr>
+                    <td>{{ i["name"] }}</td>
+                    <td>{{ i["symbol"] }}</td>
+                    <td>{{ i["sum(quantity)"] }}</td>
+                    <td>{{ i["price"] }}</td>
+                    <td>{{ i["current"] }}</td>
+                    <td>{{ i["change"] }}</td>
+                    <td>{{ i["pvalue"] }}</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <th>Cash</th>
+                    <td>{{ cash }}</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <th>Total</th>
+                    <th>{{ total }}</th>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <th><a href="/profile">Nuke Your Portfolio & Start Over</a></th>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <hr>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h2>Get a Quote</h2>
+                <form action="/quote" method="post">
+                    <div class="form-group">
+                        <input autocomplete="off" autofocus class="form-control" name="symbol" placeholder="Symbol" type="text"/>
+                    </div>
+                    <button class="btn btn-primary" type="submit">Get Quote</button>
+                </form>
+            </div>
+            <div class="col">
+                <h2>Buy a Stock</h2>
+                <form action="/buy" method="post">
+                    <div class="form-group">
+                        <input autocomplete="off" autofocus class="form-control" name="symbol" placeholder="Symbol" type="text"/>
+                    </div>
+                    <div class="form-group">
+                        <input autocomplete="off" autofocus class="form-control" name="shares" placeholder="Shares" type="number"/>
+                    </div>
+                    <button class="btn btn-primary" type="submit">Buy Shares</button>
+                </form>
+            </div>
+            <div class="col">
+                <h2>Sell a Stock</h2>
+                <form action="/sell" method="post">
+                    <div class="form-group">
+                        <select class="form-control" name="symbol">
+                            <option disabled selected value>Symbol</option>
+                            {% for i in portfolio %}
+                                <option value='{{ i["symbol"] }}'>{{ i["symbol"] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input autocomplete="off" autofocus class="form-control" name="shares" placeholder="Shares" type="number"/>
+                    </div>
+                    <button class="btn btn-primary" type="submit">Sell Shares</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

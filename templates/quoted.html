@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Quoted
+{% endblock %}
+
+{% block main %}
+    <h1>Stock Quote</h1>
+    <p class="lead">A share of {{ name }} ({{ symbol }}) costs {{ price }}.</p>
+    <p><em>Want to buy it?</em></p>
+
+    <form action="/buy" method="post">
+        <div class="form-group">
+            <input autocomplete="off" autofocus class="form-control" name="symbol" value="{{ symbol }}" type="text"/>
+        </div>
+        <div class="form-group">
+            <input autocomplete="off" autofocus class="form-control" name="shares" placeholder="Shares" type="number"/>
+        </div>
+        <button class="btn btn-primary" type="submit">Buy Shares</button>
+    </form>
+{% endblock %}

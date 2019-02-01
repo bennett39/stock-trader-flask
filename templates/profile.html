@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Profile
+{% endblock %}
+
+{% block main %}
+
+    <h1>Your Profile</h1>
+
+    <div class="table-responsive table-hover">
+        <table class="table">
+            <tr>
+                <th>Username:</th>
+                <td>{{ profile[0]["username"] }}</td>
+            </tr>
+            <tr>
+                <th>Cash on Hand:</th>
+                <td>{{ profile[0]["cash"] }}</td>
+            </tr>
+        </table>
+    </div>
+    <hr>
+
+    <div class="row">
+        <div class="col">
+            <h2>Change Password</h2>
+            <form action="/profile" method="post">
+                <div class="form-group">
+                    <input class="form-control" name="password" placeholder="Current Password" type="password"/>
+                </div>
+                <div class="form-group">
+                    <input class="form-control" name="new" placeholder="New Password" type="password"/>
+                </div>
+                <div class="form-group">
+                    <input class="form-control" name="confirmation" placeholder="Confirm New Password" type="password"/>
+                </div>
+                <button class="btn btn-primary" type="submit">Change Password</button>
+            </form>
+        </div>
+        <div class="col">
+            <h2>Nuke Your Portfolio</h2>
+            <p>Permanently resets your portfolio. Cannot be undone.</p>
+            <form action="nuke" method="post">
+                <div class="form-group">
+                    <select class="form-control" name="yesno">
+                        <option disabled selected value>Are you absolutely sure???</option>
+                        <option value="yes">Yes, delete everything and start over</option>
+                        <option value="no">No, keep my portfolio as is</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" type="submit">Nuke Everything!!!</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}
