@@ -5,6 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy import Table, Column, Integer, String, MetaData, \
                     ForeignKey
 from sqlalchemy import inspect
+from sqlalchemy.sql import text
 
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
@@ -39,7 +40,7 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-engine = create_engine(os.environ['DATABASE_URL'])
+engine = create_engine("sqlite:///finance.db") #os.environ['DATABASE_URL'])
 db = engine.connect()
 #  db = SQL("sqlite:///finance.db")
 
@@ -50,42 +51,44 @@ def index():
     """Show portfolio of stocks"""
 
     # Create portfolio dict
-    portfolio = db.execute("""SELECT txs.stock_id, sum(quantity), price, symbol, name
-                            FROM txs
-                            INNER JOIN stocks ON stocks.stock_id = txs.stock_id
-                            WHERE txs.u_id = :u_id
-                            GROUP BY txs.stock_id
-                            HAVING sum(quantity) > 0""",
-                           u_id=session["user_id"])
+    #  portfolio = db.execute(text("""SELECT txs.stock_id, sum(quantity), price, symbol, name
+                            #  FROM txs
+                            #  INNER JOIN stocks ON stocks.stock_id = txs.stock_id
+                            #  WHERE txs.u_id = :u_id
+                            #  GROUP BY txs.stock_id
+                            #  HAVING sum(quantity) > 0"""),
+                           #  u_id=session["user_id"])
 
     # Get user's cash balance
-    cash = db.execute("SELECT cash FROM users WHERE id = :u_id", u_id=session["user_id"])
+    #  cash = db.execute(text("SELECT cash FROM users WHERE id = :u_id"), u_id=session["user_id"])
 
     # Create a running total of all user's assets
-    total = cash[0]["cash"]
+    #  for i in cash:
+        #  total = i["cash"]
 
     # Lookup current stock prices
-    for i in portfolio:
+    #  for i in portfolio:
         # Get current price of stock
-        quote = lookup(i["symbol"])
+       #  quote = lookup(i["symbol"])
 
         # Create dict items for current price and present value of assets
-        i["current"] = usd(quote["price"])
-        i["pvalue"] = usd(quote["price"] * float(i["sum(quantity)"]))
+        #  i["current"] = usd(quote["price"])
+        #  i["pvalue"] = usd(quote["price"] * float(i["sum(quantity)"]))
 
-        change = (float(quote["price"]) - float(i["price"])) / float(i["price"])
-        i["change"] = "{0:.0%}".format(change)
+        #  change = (float(quote["price"]) - float(i["price"])) / float(i["price"])
+        #  i["change"] = "{0:.0%}".format(change)
 
-        i["price"] = usd(i["price"])
+        #  i["price"] = usd(i["price"])
 
         # Add present value of asset to user's total value
-        total = total + float(quote["price"]) * float(i["sum(quantity)"])
+        #  total = total + float(quote["price"]) * float(i["sum(quantity)"])
 
-    if not portfolio:
-        portfolio = [{"name": "Buy some stocks and they'll appear here!"}]
+    #  if not portfolio:
+        #  portfolio = [{"name": "Buy some stocks and they'll appear here!"}]
 
-    # Pass in the portfolio object, cash balance, and total when rendering
-    return render_template("index.html", portfolio=portfolio, cash=usd(cash[0]["cash"]), total=usd(total))
+    #  # Pass in the portfolio object, cash balance, and total when rendering
+    #  return render_template("index.html", portfolio=portfolio, cash=usd(cash[0]["cash"]), total=usd(total))
+    return render_template("index-test.html")
 
 
 @app.route("/buy", methods=["GET", "POST"])
@@ -116,30 +119,31 @@ def buy():
         total = float(quote["price"]) * float(quantity)
 
         # Get user cash balance from database
-        cash = db.execute("SELECT cash FROM users WHERE id = :u_id",
+        cash = db.execute(text("SELECT cash FROM users WHERE id = :u_id"),
                           u_id=session["user_id"])
 
         # If user has the cash to make the purchase
         if total < cash[0]["cash"]:
 
             # Check for stock in stocks table, create it if not there
-            stock_id = db.execute("SELECT stock_id FROM stocks WHERE symbol = :symbol", symbol=quote["symbol"])
+            stock_id = db.execute(text("SELECT stock_id FROM stocks WHERE symbol = :symbol"), \
+                        symbol=quote["symbol"])
 
             if not stock_id:
-                db.execute("INSERT INTO stocks (symbol, name) VALUES (:symbol, :name)",
+                db.execute(text("INSERT INTO stocks (symbol, name) VALUES (:symbol, :name)"),
                            symbol=quote["symbol"],
                            name=quote["name"])
 
-                stock_id = db.execute("SELECT stock_id FROM stocks WHERE symbol = :symbol", symbol=quote["symbol"])
+                stock_id = db.execute(text("SELECT stock_id FROM stocks WHERE symbol = :symbol"), symbol=quote["symbol"])
 
             # Create transaction in txs table
-            db.execute("INSERT INTO txs (stock_id, quantity, price, u_id) \
-                    VALUES(:stock_id, :quantity, :price, :u_id)",
+            db.execute(text("INSERT INTO txs (stock_id, quantity, price, u_id) \
+                    VALUES(:stock_id, :quantity, :price, :u_id)"),
                        stock_id=stock_id[0]["stock_id"], quantity=quantity,
                        price=quote["price"], u_id=session["user_id"])
 
             # Subtract total from cash
-            db.execute("UPDATE users SET cash = cash - :total WHERE id = :u_id",
+            db.execute(text("UPDATE users SET cash = cash - :total WHERE id = :u_id"),
                        total=total,
                        u_id=session["user_id"])
 
@@ -164,10 +168,10 @@ def history():
     """Show history of transactions"""
 
     # Create history dict
-    history = db.execute("""SELECT txs.stock_id, quantity, price, time, symbol, name
+    history = db.execute(text("""SELECT txs.stock_id, quantity, price, time, symbol, name
                             FROM txs
                             INNER JOIN stocks ON stocks.stock_id = txs.stock_id
-                            WHERE u_id = :u_id""",
+                            WHERE u_id = :u_id"""),
                          u_id=session["user_id"])
 
     # Add & update fields in history dict
@@ -202,15 +206,21 @@ def login():
             return apology("must provide password", 403)
 
         # Query database for username
-        rows = db.execute("SELECT * FROM users WHERE username = :username",
+        rows = db.execute(text("SELECT * FROM users WHERE username = :username"),
                           username=request.form.get("username"))
+        count = 0
+
+        for i in rows:
+            count += 1
+            hashcheck = i["hash"]
+            user_id = i["id"]
 
         # Ensure username exists and password is correct
-        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
+        if count != 1 or not check_password_hash(hashcheck, request.form.get("password")):
             return apology("invalid username and/or password", 403)
 
         # Remember which user has logged in
-        session["user_id"] = rows[0]["id"]
+        session["user_id"] = user_id
 
         # Redirect user to home page
         return redirect("/")
@@ -243,8 +253,8 @@ def nuke():
             return apology("OK, we won't reset your portfolio", 403)
 
         if request.form.get("yesno") == "yes":
-            db.execute("DELETE FROM txs WHERE u_id = :u_id", u_id=session["user_id"])
-            db.execute("UPDATE users SET cash = 10000 WHERE id = :u_id", u_id=session["user_id"])
+            db.execute(text("DELETE FROM txs WHERE u_id = :u_id"), u_id=session["user_id"])
+            db.execute(text("UPDATE users SET cash = 10000 WHERE id = :u_id"), u_id=session["user_id"])
 
         return redirect("/")
 
@@ -269,17 +279,20 @@ def profile():
             return apology("New password and confirmation don't match")
 
         # Query database for user info
-        rows = db.execute("SELECT * FROM users WHERE id = :u_id",
+        rows = db.execute(text("SELECT * FROM users WHERE id = :u_id"),
                           u_id=session["user_id"])
 
         # Check current password hash
-        if check_password_hash(rows[0]["hash"], request.form.get("password")):
+        for i in rows:
+            hashcheck = i["hash"]
+
+        if check_password_hash(hashcheck, request.form.get("password")):
 
             # Hash new password
             hash = generate_password_hash(request.form.get("new"))
 
             # Update users table in database
-            db.execute("UPDATE users SET hash = :hash WHERE id = :u_id",
+            db.execute(text("UPDATE users SET hash = :hash WHERE id = :u_id"),
                        hash=hash, u_id=session["user_id"])
 
             return render_template("profile.html", profile=rows, message="Successfully updated password!")
@@ -290,9 +303,10 @@ def profile():
     # Arriving via GET
     else:
         # Get user information
-        profile = db.execute("SELECT * FROM users WHERE id = :u_id",
+        profile = db.execute(text("SELECT * FROM users WHERE id = :u_id"),
                              u_id=session["user_id"])
-        profile[0]["cash"] = usd(profile[0]["cash"])
+        for i in profile:
+            cash = usd(i["cash"])
 
         return render_template("profile.html", profile=profile)
 
@@ -360,10 +374,11 @@ def register():
             return apology("Username already exists", 400)
 
         # Start session with new user id
-        rows = db.execute("SELECT * FROM users WHERE username = :username",
+        rows = db.execute(text("SELECT * FROM users WHERE username = :username"),
                           username=request.form.get("username"))
 
-        session["user_id"] = rows[0]["id"]
+        for i in rows:
+            session["user_id"] = i["id"]
 
         # Redirect user to home page
         return redirect("/")
@@ -397,12 +412,12 @@ def sell():
             return apology("No such company", 400)
 
         # Get stock id
-        stock_id = db.execute("SELECT stock_id FROM stocks WHERE symbol = :symbol",
+        stock_id = db.execute(text("SELECT stock_id FROM stocks WHERE symbol = :symbol"),
                               symbol=quote["symbol"])
-        position = db.execute("""SELECT sum(quantity)
+        position = db.execute(text("""SELECT sum(quantity)
                                 FROM txs
                                 WHERE u_id = :u_id AND stock_id = :stock_id
-                                GROUP BY stock_id""",
+                                GROUP BY stock_id"""),
                               u_id=session["user_id"],
                               stock_id=stock_id[0]["stock_id"])
         quantity = request.form.get("shares", type=int)
@@ -417,13 +432,13 @@ def sell():
             total = quantity * float(quote["price"])
 
             # Add sale to txs table
-            db.execute("INSERT INTO txs (stock_id, quantity, price, u_id) \
-                    VALUES(:stock_id, :quantity, :price, :u_id)",
+            db.execute(text("INSERT INTO txs (stock_id, quantity, price, u_id) \
+                    VALUES(:stock_id, :quantity, :price, :u_id)"),
                        stock_id=stock_id[0]["stock_id"], quantity=-1 * quantity,
                        price=quote["price"], u_id=session["user_id"])
 
             # Update cash in users table
-            db.execute("UPDATE users SET cash = cash + :total WHERE id = :u_id",
+            db.execute(text("UPDATE users SET cash = cash + :total WHERE id = :u_id"),
                        total=total,
                        u_id=session["user_id"])
 
@@ -439,20 +454,21 @@ def sell():
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
-        portfolio = db.execute("""SELECT txs.stock_id, sum(quantity), symbol
+        portfolio = db.execute(text("""SELECT txs.stock_id, sum(quantity), symbol
                             FROM txs
                             INNER JOIN stocks ON stocks.stock_id = txs.stock_id
                             WHERE txs.u_id = :u_id
                             GROUP BY txs.stock_id
-                            HAVING sum(quantity) > 0""",
+                            HAVING sum(quantity) > 0"""),
                                u_id=session["user_id"])
 
         return render_template("sell.html", portfolio=portfolio)
 
 
 def errorhandler(e):
-    """Handle error"""
-    return apology(e.name, e.code)
+    pass
+    #  """Handle error"""
+    #  return apology(e.name, e.code)
 
 
 # listen for errors
