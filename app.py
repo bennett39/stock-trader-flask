@@ -40,7 +40,7 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-engine = create_engine("sqlite:///finance.db") #os.environ['DATABASE_URL'])
+engine = create_engine(os.environ['DATABASE_URL'])
 db = engine.connect()
 #  db = SQL("sqlite:///finance.db")
 
