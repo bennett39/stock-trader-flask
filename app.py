@@ -1,6 +1,11 @@
 import os
 
-from cs50 import SQL
+import sqlalchemy
+from sqlalchemy import create_engine
+from sqlalchemy import Table, Column, Integer, String, MetaData, \
+                    ForeignKey
+from sqlalchemy import inspect
+
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 from tempfile import mkdtemp
@@ -34,8 +39,9 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-# Configure CS50 Library to use SQLite database
-db = SQL("sqlite:///finance.db")
+engine = create_engine(os.environ['DATABASE_URL'])
+db = engine.connect()
+#  db = SQL("sqlite:///finance.db")
 
 
 @app.route("/")
@@ -451,3 +457,5 @@ def errorhandler(e):
 # listen for errors
 for code in default_exceptions:
     app.errorhandler(code)(errorhandler)
+
+db.close()
