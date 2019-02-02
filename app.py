@@ -466,9 +466,8 @@ def sell():
 
 
 def errorhandler(e):
-    pass
-    #  """Handle error"""
-    #  return apology(e.name, e.code)
+    """Handle error"""
+    return apology(e, 100)
 
 
 # listen for errors
