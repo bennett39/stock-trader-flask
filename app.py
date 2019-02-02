@@ -350,8 +350,9 @@ def register():
         hash = generate_password_hash(request.form.get("password"))
 
         # Add username to database
-        result = db.execute("INSERT INTO users (username, hash) VALUES(:username, :hash)",
-                            username=request.form.get("username"),
+        result = db.execute(text("""INSERT INTO users (username, hash)
+                            VALUES(:username, :hash)"""),\
+                            username=request.form.get("username"),\
                             hash=hash)
 
         # Apologize if username already exists
