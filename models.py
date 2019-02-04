@@ -37,7 +37,8 @@ class Transaction(db.Model):
 
     stock_id = db.Column(db.Integer, 
         db.ForeignKey('stock.id', 
-            onupdate='CASCADE', ondelete='CASCADE'),
+            onupdate='CASCADE', 
+            ondelete='CASCADE'),
         nullable=False)
     stock = db.relationship('Stock',
         backref=db.backref('transactions', lazy=True))
