@@ -8,6 +8,8 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False) 
     password_hash = db.Column(db.String(120), nullable=False)
     cash = db.Column(db.Float, default=10000.00)
+    transactions = db.relationship('Transaction', cascade='all,delete',
+            backref='user')
 
     def __repr__(self):
         return f'<User {self.username}>'
@@ -18,6 +20,8 @@ class Stock(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     symbol = db.Column(db.String(20), unique=True, nullable=False)
     name = db.Column(db.String(80), unique=True, nullable=False)
+    transactions = db.relationship('Transaction', cascade='all,delete',
+            backref='stock')
 
     def __repr__(self):
         return f'<Stock {self.symbol}>'
@@ -28,20 +32,12 @@ class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
     user_id = db.Column(db.Integer, 
-        db.ForeignKey('user.id', 
-            onupdate='CASCADE', 
-            ondelete='CASCADE'),
+        db.ForeignKey('user.id', ondelete='CASCADE'), 
         nullable=False)
-    user = db.relationship('User', 
-        backref=db.backref('transactions', lazy=True))
 
     stock_id = db.Column(db.Integer, 
-        db.ForeignKey('stock.id', 
-            onupdate='CASCADE', 
-            ondelete='CASCADE'),
+        db.ForeignKey('stock.id', ondelete='CASCADE'), 
         nullable=False)
-    stock = db.relationship('Stock',
-        backref=db.backref('transactions', lazy=True))
 
     quantity = db.Column(db.Float, nullable=False)
     price = db.Column(db.Float, nullable=False)
