@@ -1,3 +1,4 @@
+alembic==1.0.7
 certifi==2018.11.29
 chardet==3.0.4
 Click==7.0
@@ -10,11 +11,15 @@ gunicorn==19.9.0
 idna==2.8
 itsdangerous==1.1.0
 Jinja2==2.10
+Mako==1.0.7
 MarkupSafe==1.1.0
 personalcapital==1.0.1
 psycopg2==2.7.7
+python-dateutil==2.7.5
 python-dotenv==0.10.1
+python-editor==1.0.4
 requests==2.21.0
+six==1.12.0
 SQLAlchemy==1.2.17
 sqlparse==0.2.4
 termcolor==1.1.0
