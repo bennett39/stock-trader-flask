@@ -34,15 +34,14 @@ def login():
         elif not password: return apology("Must provide password")
 
         user = q.select_user_by_username(username) 
-        try: check_password_hash(user.password_hash, password)
-        except AttributeError:
-            return apology("Invalid username or password")
+        try: 
+            if check_password_hash(user.password_hash, password):
+                session['user_id'] = user.id
+                return redirect('/')
+            else: return apology("Incorrect password")
+        except AttributeError: return apology("No such user")
         
-        session['user_id'] = user.id
-
-        return redirect('/')
-
-    else:
+    else: # via 'GET'
         return render_template("login.html")
 
 
