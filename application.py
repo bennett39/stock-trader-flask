@@ -68,10 +68,8 @@ def register():
         
         try: 
             q.insert_user(username, password_hash)
-        except (psycopg2.IntegrityError, sqlalchemy.exc.IntegrityError):
+        except Exception:
             return apology("Username already exists")
-        except Exception as e:
-            return apology(e)
 
         session['user_id'] = q.select_user_by_username(username).id
 
