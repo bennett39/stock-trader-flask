@@ -17,19 +17,22 @@ def index():
     session['user_id'] = 3 # Remove later
 
     user = User.query.filter_by(id=session['user_id']).first()
-    user_stocks = query_user_stocks(user)
-    
+    portfolio = build_portfolio(query_user_stocks(user))
+
+    return render_template("portfolio.html", portfolio=portfolio)
+
+
+def build_portfolio(stocks)
     portfolio = {}
-    for stock in user_stocks:
+    for stock in stocks:
         price = lookup(stock.symbol)
         portfolio[stock.symbol] = {
             'name': stock.name,
             'quantity': stock.quantity,
-            'price': price,
-            'total': stock.quantity * price, 
+            'price': usd(price),
+            'total': usd(stock.quantity * price), 
         }
-
-    return render_template("portfolio.html", portfolio=portfolio)
+    return portfolio
 
 
 def query_user_stocks(user):
