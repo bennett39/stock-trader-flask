@@ -14,8 +14,6 @@ app.jinja_env.filters['usd'] = usd
 @login_required
 def index():
     """Show portfolio of user's stocks"""
-    #  session['user_id'] = 3
-
     user = q.select_user_by_id(session['user_id'])
     portfolio = build_portfolio(q.select_stocks_by_user(user))
     portfolio['cash'] = usd(user.cash)
@@ -36,7 +34,8 @@ def login():
         elif not password: return apology("Must provide password")
 
         user = q.select_user_by_username(username) 
-        if not check_password_hash(user.password_hash, password):
+        try: check_password_hash(user.password_hash, password)
+        except AttributeError:
             return apology("Invalid username or password")
         
         session['user_id'] = user.id
@@ -67,7 +66,13 @@ def register():
 
         password_hash = generate_password_hash(password)
         
-        q.insert_user(username, password_hash)
+        try: 
+            q.insert_user(username, password_hash)
+        except (psycopg2.IntegrityError, sqlalchemy.exc.IntegrityError):
+            return apology("Username already exists")
+        except Exception as e:
+            return apology(e)
+
         session['user_id'] = q.select_user_by_username(username).id
 
         return redirect('/')

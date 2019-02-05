@@ -13,5 +13,15 @@ app.secret_key = os.getenv('SECRET_KEY').encode('utf-8')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+
+# Ensure responses aren't cached
+@app.after_request
+def after_request(response):
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Expires"] = 0
+    response.headers["Pragma"] = "no-cache"
+    return response
+
 heroku = Heroku(app)
 db = SQLAlchemy(app)
