@@ -10,7 +10,6 @@ def apology(message, code=400):
     def escape(s):
         """
         Escape special characters.
-
         https://github.com/jacebrowning/memegen#special-characters
         """
         for old, new in [("-", "--"), (" ", "-"), ("_", "__"), ("?", "~q"),
@@ -20,10 +19,23 @@ def apology(message, code=400):
     return render_template("apology.html", top=code, bottom=escape(message)), code
 
 
+def build_portfolio(stocks):
+    """Build portfolio of current stock values."""
+    portfolio = {}
+    for stock in stocks:
+        price = lookup(stock.symbol)
+        portfolio[stock.symbol] = {
+            'name': stock.name,
+            'quantity': stock.quantity,
+            'price': usd(price),
+            'total': usd(stock.quantity * price), 
+        }
+    return portfolio
+
+
 def login_required(f):
     """
     Decorate routes to require login.
-
     http://flask.pocoo.org/docs/0.12/patterns/viewdecorators/
     """
     @wraps(f)
@@ -35,7 +47,10 @@ def login_required(f):
 
 
 def lookup(symbol):
-    """Look up quote for symbol."""
+    """
+    Look up a quote for a stock symbol.
+    https://iextrading.com/developer/docs/
+    """
 
     # Contact API
     try:
