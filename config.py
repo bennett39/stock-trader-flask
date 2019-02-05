@@ -6,8 +6,12 @@ from flask_heroku import Heroku
 from flask_sqlalchemy import SQLAlchemy
 
 load_dotenv()
+
 app = Flask( __name__ )
+app.secret_key = os.getenv('SECRET_KEY').encode('utf-8')
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+
 heroku = Heroku(app)
 db = SQLAlchemy(app)
