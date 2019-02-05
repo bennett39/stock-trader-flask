@@ -17,19 +17,26 @@ def index():
     session['user_id'] = 3 # Remove later
 
     user = User.query.filter_by(id=session['user_id']).first()
-
-    portfolio = db.session.query(
-            Transaction.stock_id, 
-            func.sum(Transaction.quantity).label('total'),
-            Stock.name,
-            Stock.symbol,
-            User.username
-        ).join(User).join(Stock).group_by(
-            Transaction.stock_id, Stock, User
-        ).filter(User.id==user.id).all()
+    user_stocks = query_user_stocks(user)
+    
+    portfolio = {}
+    for stock in user_stocks:
+        price = lookup(stock.symbol)
+        portfolio[stock.symbol] = {
+            'name': stock.name,
+            'quantity': stock.quantity,
+            'price': price,
+            'total': stock.quantity * price, 
+        }
 
     return render_template("portfolio.html", portfolio=portfolio)
 
-def get_portfolio_value(portfolio):
-    for stock in portfolio:
-               
+
+def query_user_stocks(user):
+    return db.session.query(
+            func.sum(Transaction.quantity).label('quantity'),
+            Stock.name,
+            Stock.symbol,
+        ).join(User).join(Stock).group_by(
+            Transaction.stock_id, Stock, User
+        ).filter(User.id==user.id).all()
