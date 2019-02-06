@@ -10,17 +10,24 @@ def apology(error, code=400):
     return render_template("apology.html", error=error, code=code)
 
 
-def build_portfolio(stocks):
+def build_portfolio(stocks, cash):
     """Build portfolio of current stock values."""
-    portfolio = {}
+    portfolio = {
+        'stocks': {},
+        'cash': usd(cash), 
+        'total': cash
+    }
     for stock in stocks:
         price = lookup(stock.symbol)
-        portfolio[stock.symbol] = {
+        value = stock.quantity * price 
+        portfolio['stocks'][stock.symbol] = {
             'name': stock.name,
             'quantity': stock.quantity,
             'price': usd(price),
-            'total': usd(stock.quantity * price), 
+            'value': usd(value), 
         }
+        portfolio['total'] += value
+    portfolio['total'] = usd(portfolio['total'])
     return portfolio
 
 

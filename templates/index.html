@@ -13,45 +13,35 @@
                     <th>Company</th>
                     <th>Symbol</th>
                     <th>Shares</th>
-                    <th>Price Bought</th>
                     <th>Current Price</th>
-                    <th>Change</th>
                     <th>Present Value</th>
                 </tr>
             </thead>
             <tbody>
-                {% for i in portfolio %}
+                {% for stock in portfolio['stocks'] %}
                 <tr>
-                    <td>{{ i["name"] }}</td>
-                    <td>{{ i["symbol"] }}</td>
-                    <td>{{ i["sum(quantity)"] }}</td>
-                    <td>{{ i["price"] }}</td>
-                    <td>{{ i["current"] }}</td>
-                    <td>{{ i["change"] }}</td>
-                    <td>{{ i["pvalue"] }}</td>
+                    <td>{{ portfolio['stocks'][stock]['name'] }}</td>
+                    <td>{{ stock }}</td>
+                    <td>{{ portfolio['stocks'][stock]['quantity'] }}</td>
+                    <td>{{ portfolio['stocks'][stock]['price'] }}</td>
+                    <td>{{ portfolio['stocks'][stock]['value'] }}</td>
                 </tr>
                 {% endfor %}
                 <tr>
                     <td></td>
                     <td></td>
                     <td></td>
-                    <td></td>
-                    <td></td>
                     <th>Cash</th>
-                    <td>{{ cash }}</td>
+                    <td>{{ portfolio['cash'] }}</td>
                 </tr>
                 <tr>
-                    <td></td>
-                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
                     <th>Total</th>
-                    <th>{{ total }}</th>
+                    <th>{{ portfolio['total'] }}</th>
                 </tr>
                 <tr>
-                    <td></td>
-                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -92,7 +82,7 @@
                         <select class="form-control" name="symbol">
                             <option disabled selected value>Symbol</option>
                             {% for i in portfolio %}
-                                <option value='{{ i["symbol"] }}'>{{ i["symbol"] }}</option>
+                                <option value='{{ i }}'>{{ i }}</option>
                             {% endfor %}
                         </select>
                     </div>

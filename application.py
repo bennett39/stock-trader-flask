@@ -15,10 +15,9 @@ app.jinja_env.filters['usd'] = usd
 def index():
     """Show portfolio of user's stocks"""
     user = q.select_user_by_id(session['user_id'])
-    portfolio = build_portfolio(q.select_stocks_by_user(user))
-    portfolio['cash'] = usd(user.cash)
+    portfolio = build_portfolio(q.select_stocks_by_user(user), user.cash)
 
-    return render_template("portfolio.html", portfolio=portfolio)
+    return render_template("index.html", portfolio=portfolio)
 
 
 @app.route('/login', methods=['GET','POST'])
