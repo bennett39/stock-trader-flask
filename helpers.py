@@ -18,7 +18,7 @@ def build_portfolio(stocks, cash):
         'total': cash
     }
     for stock in stocks:
-        price = lookup(stock.symbol)
+        price = lookup(stock.symbol)['price']
         value = stock.quantity * price 
         portfolio['stocks'][stock.symbol] = {
             'name': stock.name,
@@ -60,7 +60,11 @@ def lookup(symbol):
     # Parse response
     try:
         quote = response.json()
-        return float(quote["latestPrice"])
+        return {
+            'name': quote['companyName'],
+            'price': float(quote['latestPrice']),
+            'symbol': quote['symbol']
+        }
     except (KeyError, TypeError, ValueError):
         return None
 

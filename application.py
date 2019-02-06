@@ -40,8 +40,7 @@ def login():
             else: return apology("Incorrect password")
         except AttributeError: return apology("No such user")
         
-    else: # via 'GET'
-        return render_template("login.html")
+    else: return render_template("login.html")
 
 
 @app.route('/logout')
@@ -49,6 +48,21 @@ def logout():
     """Log user out"""
     session.clear()
     return redirect('/login')
+
+
+@app.route('/quote', methods=['GET', 'POST'])
+@login_required
+def quote():
+    """Get stock quote"""
+    if request.method == 'POST':
+        quote = lookup(request.form.get('symbol'))
+        
+        if not quote: return apology("Company doesn't exist.")
+        
+        return render_template('quoted.html', symbol=quote['symbol'],
+                price=quote['price'], name=quote['name']) 
+
+    else: return render_template('quote.html')
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -80,5 +94,4 @@ def register():
 
         return redirect('/')
 
-    else:
-        return render_template("register.html")
+    else: return render_template("register.html")
