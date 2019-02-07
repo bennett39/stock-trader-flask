@@ -18,15 +18,18 @@ def build_portfolio(stocks, cash):
         'total': cash
     }
     for stock in stocks:
-        price = lookup(stock.symbol)['price']
-        value = stock.quantity * price 
-        portfolio['stocks'][stock.symbol] = {
-            'name': stock.name,
-            'quantity': stock.quantity,
-            'price': usd(price),
-            'value': usd(value), 
-        }
-        portfolio['total'] += value
+        if stock.quantity <= 0:
+            portfolio['stocks'].pop(stock, None)
+        else:
+            price = lookup(stock.symbol)['price']
+            value = stock.quantity * price 
+            portfolio['stocks'][stock.symbol] = {
+                'name': stock.name,
+                'quantity': stock.quantity,
+                'price': usd(price),
+                'value': usd(value), 
+            }
+            portfolio['total'] += value
     portfolio['total'] = usd(portfolio['total'])
     return portfolio
 
