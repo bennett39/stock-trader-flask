@@ -47,12 +47,10 @@ def buy():
                 stock = q.select_stock_by_symbol(quote['symbol'])
             q.insert_transaction(session['user_id'], stock.id, shares,
                     quote['price'])
-            q.update_user_cash((user.cash - order_total),
-                    session['user_id'])
+            q.update_user_cash(order_total*-1, session['user_id'])
             return redirect('/')
         return apology("Not enough cash")
     else: return render_template('buy.html')
-
 
 
 @app.route('/login', methods=['GET','POST'])
@@ -129,4 +127,46 @@ def register():
 
         return redirect('/')
 
-    else: return render_template("register.html")
+    return render_template("register.html")
+
+
+@app.route('/sell', methods=['GET', 'POST'])
+@login_required
+def sell():
+    """Sell shares of stock"""
+    if request.method == 'POST':
+        symbol = request.form.get('symbol')
+        shares = request.form.get('shares')
+        if not symbol: return apology("Provide a symbol")
+        elif not shares.isdigit():
+            return apology("Provide a valid quantity")
+        shares = float(shares)
+
+        quote = lookup(symbol)
+        if not quote: return apology("No such company")
+
+        stock = q.select_stock_by_symbol(symbol)
+        position = q.select_transactions_by_stock(stock,
+                session['user_id'])
+        try: 
+            stock.id
+            position.shares
+        except AttributeError: 
+            return apology("You don't own that stock")
+
+        if position.shares >= shares:
+            order_total = shares * quote['price']
+            q.insert_transaction(session['user_id'], stock.id,
+                    shares*-1, quote['price'])
+            q.update_user_cash(order_total, session['user_id'])
+            return redirect('/')
+        else:
+            return apology("You don't own enough of that stock.")
+
+    else: 
+        user = q.select_user_by_id(session['user_id'])
+
+        return render_template('sell.html', 
+                portfolio=build_portfolio(
+                    q.select_stocks_by_user(user),
+                    user.cash))

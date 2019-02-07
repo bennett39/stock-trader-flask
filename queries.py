@@ -32,15 +32,25 @@ def select_stock_by_symbol(symbol):
 
 def select_stocks_by_user(user):
     """Get list of stocks owned by a given user."""
-    return db.session.query(
-            func.sum(Transaction.quantity).label('quantity'),
-            Stock.name,
-            Stock.symbol,
-        ).join(User).join(Stock).group_by(
-            Transaction.stock_id, Stock, User
-        ).filter(User.id==user.id).all()
+    return (db.session.query(
+                func.sum(Transaction.quantity).label('quantity'),
+                Stock.name,
+                Stock.symbol,
+            ).join(User).join(Stock).group_by(
+                Transaction.stock_id, Stock, User
+            ).filter(User.id==user.id).all())
 
-def update_user_cash(cash, user_id):
+def select_transactions_by_stock(stock, user_id):
+    return (db.session.query(
+                func.sum(Transaction.quantity).label('shares')
+            ).group_by(
+                Transaction.stock_id    
+            ).filter(
+                Transaction.stock_id == stock.id,
+                Transaction.user_id == user_id
+            ).one())
+
+def update_user_cash(change, user_id):
     user = select_user_by_id(user_id)
-    user.cash = cash
+    user.cash = user.cash + change
     db.session.commit()
