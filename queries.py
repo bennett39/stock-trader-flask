@@ -2,6 +2,15 @@ from config import db
 from models import User, Stock, Transaction
 from sqlalchemy.sql import func
 
+
+def delete_transactions_by_user(user_id):
+    transactions = Transaction.query.filter(
+            Transaction.user_id==user_id
+            ).all()
+    for t in transactions:
+        db.session.delete(t)
+    db.session.commit()
+
 def insert_stock(symbol, name):
     stock = Stock(symbol=symbol, name=name)
     db.session.add(stock)

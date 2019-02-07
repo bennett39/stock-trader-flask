@@ -11,6 +11,7 @@ import queries as q
 
 app.jinja_env.filters['usd'] = usd
 
+
 @app.route('/')
 @login_required
 def index():
@@ -93,6 +94,50 @@ def logout():
     """Log user out"""
     session.clear()
     return redirect('/login')
+
+
+@app.route('/nuke', methods=['GET', 'POST'])
+@login_required
+def nuke():
+    """Reset user portfolio"""
+    if request.method == 'POST':
+        confirm = request.form.get('yesno')
+        if not confirm or confirm == 'no':
+            return apology("Ok, we won't reset your portfolio")
+        if confirm == 'yes':
+            q.delete_transactions_by_user(session['user_id'])
+            user = q.select_user_by_id(session['user_id'])
+            q.update_user_cash(10000-user.cash, session['user_id'])
+        return redirect('/')
+    return redirect('/profile')
+
+
+@app.route('/profile')
+@login_required
+def profile():
+    """Show user profile information"""
+    if request.method == 'POST':
+        password = request.form.get('password')
+        new_password = request.form.get('new')
+        confirmation = request.form.get('confirmation')
+        if not password or not new_password or not confirmation:
+            return apology("Please fill all fields")
+        elif new_password != confirmation:
+            return apology("New password and confirmation don't match")
+
+        user = q.select_user_by_id(session['user_id'])
+        if check_password_hash(password_hash, password):
+            new_hash = generate_password_hash(new_password)
+            q.update_user_hash(new_hash, session['user_id'])
+            return render_template('profile.html', user=user)
+        else:
+            return apology("Incorrect password")
+    else:
+        user = q.select_user_by_id(session['user_id'])
+        user.cash = usd(user.cash)
+        return render_template('profile.html', user=user)
+
+        
 
 
 @app.route('/quote', methods=['GET', 'POST'])
