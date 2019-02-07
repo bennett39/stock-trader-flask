@@ -112,7 +112,7 @@ def nuke():
     return redirect('/profile')
 
 
-@app.route('/profile')
+@app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
     """Show user profile information"""
@@ -126,10 +126,10 @@ def profile():
             return apology("New password and confirmation don't match")
 
         user = q.select_user_by_id(session['user_id'])
-        if check_password_hash(password_hash, password):
+        if check_password_hash(user.password_hash, password):
             new_hash = generate_password_hash(new_password)
             q.update_user_hash(new_hash, session['user_id'])
-            return render_template('profile.html', user=user)
+            return redirect('/login')
         else:
             return apology("Incorrect password")
     else:
@@ -138,8 +138,6 @@ def profile():
         return render_template('profile.html', user=user)
 
         
-
-
 @app.route('/quote', methods=['GET', 'POST'])
 @login_required
 def quote():

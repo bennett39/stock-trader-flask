@@ -78,3 +78,8 @@ def update_user_cash(change, user_id):
     user = select_user_by_id(user_id)
     user.cash = user.cash + change
     db.session.commit()
+
+def update_user_hash(new_hash, user_id):
+    user = select_user_by_id(user_id)
+    user.password_hash = new_hash
+    db.session.commit()
