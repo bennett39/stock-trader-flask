@@ -10,6 +10,21 @@ def apology(error, code=400):
     return render_template("apology.html", error=error, code=code)
 
 
+def build_history(transactions):
+    history = {}
+    for transaction in transactions:
+        history[transaction.id] = {
+                'name': transaction.name,
+                'symbol': transaction.symbol,
+                'quantity': transaction.quantity,
+                'price': usd(transaction.price),
+                'type': 'Sell' if transaction.quantity < 0 else 'Buy',
+                'total': usd(transaction.price * transaction.quantity),
+                'time': transaction.time
+        }
+    return history
+
+
 def build_portfolio(stocks, cash):
     """Build portfolio of current stock values."""
     portfolio = {

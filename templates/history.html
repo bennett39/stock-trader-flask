@@ -23,13 +23,13 @@
             <tbody>
                 {% for i in history %}
                     <tr>
-                        <td>{{ i["type"] }}</td>
-                        <td>{{ i["name"] }}</td>
-                        <td>{{ i["symbol"] }}</td>
-                        <td>{{ i["price"] }}</td>
-                        <td>{{ i["quantity"] }}</td>
-                        <td>{{ i["total"] }}</td>
-                        <td>{{ i["time"] }}</td>
+                        <td>{{ history[i]["type"] }}</td>
+                        <td>{{ history[i]["name"] }}</td>
+                        <td>{{ history[i]["symbol"] }}</td>
+                        <td>{{ history[i]["price"] }}</td>
+                        <td>{{ history[i]["quantity"] }}</td>
+                        <td>{{ history[i]["total"] }}</td>
+                        <td>{{ history[i]["time"] }}</td>
                     </tr>
                 {% endfor %}
             </tbody>

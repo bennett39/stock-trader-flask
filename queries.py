@@ -40,7 +40,22 @@ def select_stocks_by_user(user):
                 Transaction.stock_id, Stock, User
             ).filter(User.id==user.id).all())
 
+def select_transactions_by_user(user_id):
+    """Get a list of all a user's transactions"""
+    return (db.session.query(
+                Transaction.id,
+                Transaction.quantity,
+                Transaction.price,
+                Transaction.time,
+                Stock.name,
+                Stock.symbol,
+            ).join(Stock).filter(
+                Transaction.user_id==user_id
+            ).all())
+
+
 def select_transactions_by_stock(stock, user_id):
+    """Get the sum of all a user's transactions of a certain stock"""
     return (db.session.query(
                 func.sum(Transaction.quantity).label('shares')
             ).group_by(

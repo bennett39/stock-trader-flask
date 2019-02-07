@@ -5,7 +5,8 @@ from werkzeug.exceptions import default_exceptions
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from config import app, db
-from helpers import apology, build_portfolio, login_required, lookup, usd
+from helpers import apology, build_history, build_portfolio, \
+            login_required, lookup, usd
 import queries as q
 
 app.jinja_env.filters['usd'] = usd
@@ -51,6 +52,17 @@ def buy():
             return redirect('/')
         return apology("Not enough cash")
     else: return render_template('buy.html')
+
+
+@app.route('/history')
+@login_required
+def history():
+    """Show history of transactions"""
+    history = dict(sorted(build_history(
+            q.select_transactions_by_user(session['user_id'])).items()))
+    return render_template('history.html', history=history)
+
+
 
 
 @app.route('/login', methods=['GET','POST'])
