@@ -20,6 +20,41 @@ def index():
     return render_template("index.html", portfolio=portfolio)
 
 
+@app.route('/buy', methods=['GET', 'POST'])
+@login_required
+def buy():
+    """Buy shares of stock"""
+    if request.method == 'POST':
+        symbol = request.form.get('symbol')
+        shares= request.form.get('shares')
+
+        if not symbol: 
+            return apology("Provide a symbol")
+        elif not shares.isdigit():
+            return apology("Provide a valid quantity")
+
+        quote = lookup(symbol)
+        if not quote: return apology("No such company")
+
+        order_total = float(shares) * float(quote['price'])
+        user = q.select_user_by_id(session['user_id'])
+
+        if order_total <= user.cash:
+            stock = q.select_stock_by_symbol(quote['symbol'])
+            try: stock.id
+            except AttributeError:
+                q.insert_stock(quote['symbol'], quote['name'])
+                stock = q.select_stock_by_symbol(quote['symbol'])
+            q.insert_transaction(session['user_id'], stock.id, shares,
+                    quote['price'])
+            q.update_user_cash((user.cash - order_total),
+                    session['user_id'])
+            return redirect('/')
+        return apology("Not enough cash")
+    else: return render_template('buy.html')
+
+
+
 @app.route('/login', methods=['GET','POST'])
 def login():
     """Log user in"""
