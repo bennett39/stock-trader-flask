@@ -5,8 +5,8 @@ from werkzeug.exceptions import default_exceptions
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from config import app, db
-from helpers import apology, build_history, build_portfolio, \
-            login_required, lookup, usd
+from helpers import apology, build_history, build_portfolio,\
+            get_symbols, login_required, lookup, usd
 import queries as q
 
 app.jinja_env.filters['usd'] = usd
@@ -17,7 +17,9 @@ app.jinja_env.filters['usd'] = usd
 def index():
     """Show portfolio of user's stocks"""
     user = q.select_user_by_id(session['user_id'])
-    portfolio = build_portfolio(q.select_stocks_by_user(user), user.cash)
+    portfolio = build_portfolio(
+            q.select_stocks_by_user(user.id), 
+            user.cash)
 
     return render_template("index.html", portfolio=portfolio)
 
@@ -223,5 +225,14 @@ def sell():
 
         return render_template('sell.html', 
                 portfolio=build_portfolio(
-                    q.select_stocks_by_user(user),
+                    q.select_stocks_by_user(user.id),
                     user.cash))
+
+
+@app.route('/symbols')
+def symbols():
+    symbols = get_symbols()
+    stocks = []
+    for i in symbols:
+        stocks.append(i['name'])
+    return render_template('symbols.html', stocks=stocks)

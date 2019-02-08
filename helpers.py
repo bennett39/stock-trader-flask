@@ -87,6 +87,28 @@ def lookup(symbol):
         return None
 
 
+def get_symbols():
+    """
+    Look up all available symbols listed on IEX.
+    https://iextrading.com/developer/docs/
+    """
+    # Contact API
+    try:
+        response = requests.get(
+                "https://api.iextrading.com/1.0/ref-data/symbols")
+        response.raise_for_status()
+    except requests.RequestException:
+        return None
+
+    # Parse response
+    try:
+        symbols = response.json()
+        return symbols
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
+
 def usd(value):
     """Format value as USD."""
     return f"${value:,.2f}"
