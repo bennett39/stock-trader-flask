@@ -20,8 +20,10 @@ def index():
     portfolio = build_portfolio(
             q.select_stocks_by_user(user.id), 
             user.cash)
+    session['stocks'] = get_stocks()
 
-    return render_template("index.html", portfolio=portfolio)
+    return render_template("index.html", portfolio=portfolio,
+            stocks=session['stocks'])
 
 
 @app.route('/buy', methods=['GET', 'POST'])
