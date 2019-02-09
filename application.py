@@ -234,5 +234,5 @@ def symbols():
     symbols = get_symbols()
     stocks = []
     for i in symbols:
-        stocks.append(i['name'])
+        stocks.append({'name': i['name'], 'symbol': i['symbol']})
     return render_template('symbols.html', stocks=stocks)
