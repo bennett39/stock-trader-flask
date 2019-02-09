@@ -65,15 +65,16 @@
             </div>
             <div class="col">
                 <h2>Buy a Stock</h2>
-                <form action="/buy" method="post">
-                    <div class="form-group">
-                        <input autocomplete="off" autofocus class="form-control" name="symbol" placeholder="Symbol" type="text"/>
-                    </div>
-                    <div class="form-group">
-                        <input autocomplete="off" autofocus class="form-control" name="shares" placeholder="Shares" type="number"/>
-                    </div>
-                    <button class="btn btn-primary" type="submit">Buy Shares</button>
-                </form>
+                {% include 'symbols.html' %}
+                <!-- <form action="/buy" method="post"> -->
+                    <!-- <div class="form-group"> -->
+                        <!-- <input autocomplete="off" autofocus class="form-control" name="symbol" placeholder="Symbol" type="text"/> -->
+                    <!-- </div> -->
+                    <!-- <div class="form-group"> -->
+                        <!-- <input autocomplete="off" autofocus class="form-control" name="shares" placeholder="Shares" type="number"/> -->
+                    <!-- </div> -->
+                    <!-- <button class="btn btn-primary" type="submit">Buy Shares</button> -->
+                <!-- </form> -->
             </div>
             <div class="col">
                 <h2>Sell a Stock</h2>

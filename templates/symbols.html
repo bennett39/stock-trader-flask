@@ -2,7 +2,7 @@
 <script src="/static/awesomplete-gh-pages/awesomplete.js" async></script>
 
 <form method="post" action="/buy">
-  <input class="awesomeplete" type="text" list="stockList" />
+  <input class="awesomeplete" type="text" name="symbol" list="stockList" />
   <datalist id="stockList">
     {% for stock in stocks %}
     <option selected value="{{stock['symbol']}}">
@@ -10,5 +10,6 @@
     </option>
     {% endfor %}
   </datalist>
+  <input type="number" name="shares" />
   <input type="submit" />
 </form>

@@ -6,7 +6,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from config import app, db
 from helpers import apology, build_history, build_portfolio,\
-            get_symbols, login_required, lookup, usd
+            get_stocks, login_required, lookup, usd
 import queries as q
 
 app.jinja_env.filters['usd'] = usd
@@ -231,8 +231,4 @@ def sell():
 
 @app.route('/symbols')
 def symbols():
-    symbols = get_symbols()
-    stocks = []
-    for i in symbols:
-        stocks.append({'name': i['name'], 'symbol': i['symbol']})
-    return render_template('symbols.html', stocks=stocks)
+    return render_template('symbols.html', stocks=get_stocks())

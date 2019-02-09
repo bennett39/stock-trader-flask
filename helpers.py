@@ -87,7 +87,7 @@ def lookup(symbol):
         return None
 
 
-def get_symbols():
+def get_stocks():
     """
     Look up all available symbols listed on IEX.
     https://iextrading.com/developer/docs/
@@ -102,8 +102,11 @@ def get_symbols():
 
     # Parse response
     try:
-        symbols = response.json()
-        return symbols
+        stocks = response.json()
+        for stock in stocks:
+            if stock['type'] != 'cs':
+                stocks.remove(stock)
+        return stocks
     except (KeyError, TypeError, ValueError):
         return None
 
