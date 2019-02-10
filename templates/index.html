@@ -56,25 +56,11 @@
         <div class="row">
             <div class="col">
                 <h2>Get a Quote</h2>
-                <form action="/quote" method="post">
-                    <div class="form-group">
-                        <input autocomplete="off" autofocus class="form-control" name="symbol" placeholder="Symbol" type="text"/>
-                    </div>
-                    <button class="btn btn-primary" type="submit">Get Quote</button>
-                </form>
+                {% include 'quote_stocks.html' %}
             </div>
             <div class="col">
                 <h2>Buy a Stock</h2>
-                {% include 'symbols.html' %}
-                <!-- <form action="/buy" method="post"> -->
-                    <!-- <div class="form-group"> -->
-                        <!-- <input autocomplete="off" autofocus class="form-control" name="symbol" placeholder="Symbol" type="text"/> -->
-                    <!-- </div> -->
-                    <!-- <div class="form-group"> -->
-                        <!-- <input autocomplete="off" autofocus class="form-control" name="shares" placeholder="Shares" type="number"/> -->
-                    <!-- </div> -->
-                    <!-- <button class="btn btn-primary" type="submit">Buy Shares</button> -->
-                <!-- </form> -->
+                {% include 'buy_stocks.html' %}
             </div>
             <div class="col">
                 <h2>Sell a Stock</h2>

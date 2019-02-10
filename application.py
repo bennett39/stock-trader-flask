@@ -7,6 +7,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from config import app, db
 from helpers import apology, build_history, build_portfolio,\
             get_stocks, login_required, lookup, usd
+from stocks import stocks
 import queries as q
 
 app.jinja_env.filters['usd'] = usd
@@ -20,10 +21,9 @@ def index():
     portfolio = build_portfolio(
             q.select_stocks_by_user(user.id), 
             user.cash)
-    session['stocks'] = get_stocks()
 
     return render_template("index.html", portfolio=portfolio,
-            stocks=session['stocks'])
+            stocks=stocks)
 
 
 @app.route('/buy', methods=['GET', 'POST'])
@@ -56,7 +56,7 @@ def buy():
             q.update_user_cash(order_total*-1, session['user_id'])
             return redirect('/')
         return apology("Not enough cash")
-    else: return render_template('buy.html')
+    else: return render_template('buy.html', stocks=stocks)
 
 
 @app.route('/history')
@@ -66,8 +66,6 @@ def history():
     history = dict(sorted(build_history(
             q.select_transactions_by_user(session['user_id'])).items()))
     return render_template('history.html', history=history)
-
-
 
 
 @app.route('/login', methods=['GET','POST'])
@@ -154,7 +152,8 @@ def quote():
         return render_template('quoted.html', symbol=quote['symbol'],
                 price=quote['price'], name=quote['name']) 
 
-    else: return render_template('quote.html')
+    else: 
+        return render_template('quote.html', stocks=stocks)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -229,8 +228,3 @@ def sell():
                 portfolio=build_portfolio(
                     q.select_stocks_by_user(user.id),
                     user.cash))
-
-
-@app.route('/symbols')
-def symbols():
-    return render_template('symbols.html', stocks=get_stocks())

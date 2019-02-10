@@ -104,8 +104,13 @@ def get_stocks():
     try:
         stocks = response.json()
         for stock in stocks:
-            if stock['type'] != 'cs':
+            if stock['type'] != 'cs' or stock['isEnabled'] == False:
                 stocks.remove(stock)
+            else:
+                stock.pop('date')
+                stock.pop('isEnabled')
+                stock.pop('type')
+                stock.pop('iexId')
         return stocks
     except (KeyError, TypeError, ValueError):
         return None

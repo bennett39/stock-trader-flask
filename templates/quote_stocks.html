@@ -1,0 +1,17 @@
+<link rel="stylesheet" href="/static/awesomplete-gh-pages/awesomplete.css" />
+<script src="/static/awesomplete-gh-pages/awesomplete.js" async></script>
+
+<form method="post" action="/quote">
+  <div class="form-group">
+    <input class="form-control" type="text" name="symbol" 
+    id="quoteSymbol" placeholder="Stock" list="quoteList" />
+    <datalist id="quoteList">
+      {% for stock in stocks %}
+      <option selected value="{{stock['symbol']}}">
+        {{stock['name']}}
+      </option>
+      {% endfor %}
+    </datalist>
+  </div>
+  <button class="btn btn-primary" type="submit">Quote Stocks</button>
+</form>
