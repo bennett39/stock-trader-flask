@@ -18,9 +18,8 @@ class MyTest(TestCase):
         db.session.remove()
         db.drop_all()
 
-    def test_db(self):
+    def test_db_connection(self):
         user = User(username="test", password_hash="test")
         db.session.add(user)
         db.session.commit()
         assert user in db.session
-
