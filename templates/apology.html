@@ -1,9 +1,25 @@
-{% extends "layout.html" %}
+{% extends "landing.html" %}
 
 {% block title %}
     Apology
 {% endblock %}
 
 {% block main %}
-<h1>{{code}}: {{error}}</h1>
+  <div class="row top-margin">
+    <div class="col-sm text-center">
+      <img src="/static/stocktrader-white.png" alt="Stock Trader logo"
+      class="mx-auto">
+    </div>
+    <div class="col-sm">
+      <div class="card mx-auto" style="width:18rem">
+        <div class="card-header">
+          <h1>Error: {{code}}</h1>
+        </div>
+        <div class="card-body">
+          <p>{{error}}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
 {% endblock %}
