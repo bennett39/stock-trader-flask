@@ -7,8 +7,8 @@
 {% block main %}
     <h1>Your Portfolio</h1>
     <div class="table-responsive table-hover">
-        <table class="table">
-            <thead class="thead-dark">
+        <table class="table table-sm">
+            <thead class="thead-light">
                 <tr>
                     <th>Company</th>
                     <th>Symbol</th>
@@ -41,28 +41,23 @@
                     <th>Total</th>
                     <th>{{ portfolio['total'] }}</th>
                 </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <th><a href="/profile">Nuke Your Portfolio & Start Over</a></th>
-                </tr>
             </tbody>
         </table>
     </div>
+      <p class="text-center"><a href="/profile">Nuke Your Portfolio &
+        Start Over</a></p>
     <hr>
     <div class="container">
         <div class="row">
-            <div class="col">
+            <div class="col mb-4">
                 <h2>Get a Quote</h2>
                 {% include 'quote_stocks.html' %}
             </div>
-            <div class="col">
+            <div class="col mb-4">
                 <h2>Buy a Stock</h2>
                 {% include 'buy_stocks.html' %}
             </div>
-            <div class="col">
+            <div class="col mb-4">
                 <h2>Sell a Stock</h2>
                 <form action="/sell" method="post">
                     <div class="form-group">
