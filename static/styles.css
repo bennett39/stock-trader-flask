@@ -34,7 +34,7 @@ main {
   text-align: center;
 }
 
-main img {
+img {
   /* constrain images on small screens */
   max-width: 100%;
 }
