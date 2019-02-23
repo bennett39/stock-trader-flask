@@ -1,3 +1,4 @@
+import urllib
 from flask_testing import TestCase
 
 from config import create_app, db
@@ -9,7 +10,9 @@ class MyTest(TestCase):
     TESTING = True
 
     def create_app(self):
-        return create_app()
+        app = create_app()
+        db.init_app(app)
+        return app
 
     def setUp(self):
         db.create_all()
