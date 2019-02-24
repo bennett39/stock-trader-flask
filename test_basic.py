@@ -26,3 +26,12 @@ class MyTest(TestCase):
         db.session.add(user)
         db.session.commit()
         assert user in db.session
+
+    def test_user_count(self):
+        a = User(username="aaa", password_hash="aaa")
+        b = User(username="bbb", password_hash="bbb")
+        db.session.add(a)
+        db.session.add(b)
+        db.session.commit()
+        users = User.query.all()
+        assert sum(1 for u in users) == 2

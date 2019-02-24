@@ -13,13 +13,14 @@ def create_app():
     app = Flask( __name__ )
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.secret_key = os.getenv('SECRET_KEY').encode('utf-8')
-    db.init_app(app)
     return app
 
 app = create_app()
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['TEMPLATES_AUTO_RELOAD'] = True
+
+db.init_app(app)
 
 # Ensure responses aren't cached
 @app.after_request
