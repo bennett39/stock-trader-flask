@@ -1,16 +1,14 @@
 import urllib
 from flask_testing import TestCase
+from flask_sqlalchemy import SQLAlchemy
 
 from config import create_app, db
 import queries as q
 
 class MyTest(TestCase):
-    SQLALCHEMY_DATABASE_URI = "sqlite://"
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    TESTING = True
-
     def create_app(self):
-        app = create_app()
+        app = create_app("sqlite://")
+        app.config['TESTING'] = True
         db.init_app(app)
         return app
 
@@ -74,5 +72,3 @@ class MyTest(TestCase):
         db.session.commit()
         a = q.User.query.first()
         assert a == q.select_user_by_id(a.id)
-
-    

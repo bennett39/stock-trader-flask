@@ -7,19 +7,17 @@ from flask_sqlalchemy import SQLAlchemy
 
 load_dotenv()
 
-db = SQLAlchemy()
-
-def create_app():
+def create_app(db_uri):
     app = Flask( __name__ )
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
     app.secret_key = os.getenv('SECRET_KEY').encode('utf-8')
     return app
 
-app = create_app()
+app = create_app(os.getenv('DATABASE_URL'))
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
-app.config['TEMPLATES_AUTO_RELOAD'] = True
-
+db = SQLAlchemy()
 db.init_app(app)
 
 # Ensure responses aren't cached
