@@ -1,7 +1,3 @@
-# Coverage
-htmlcov/
-.coverage
-.coveragerc
 
 # Vim
 *.swp
