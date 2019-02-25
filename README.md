@@ -1,4 +1,6 @@
 # stock-trader
+[![Build Status](https://travis-ci.org/bennett39/stock-trader.svg?branch=master)](https://travis-ci.org/bennett39/stock-trader)
+
 A game to test your stock trading skills with real data from the IEX API
 
 ![Stock Trader screenshot](https://raw.githubusercontent.com/bennett39/stock-trader/master/static/screenshot.png)
