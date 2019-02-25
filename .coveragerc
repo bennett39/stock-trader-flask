@@ -1,6 +1,0 @@
-[run]
-omit =
-    */.local/*
-    */.pyenv/*
-    */.pytest_cache/*
-    */static/*
