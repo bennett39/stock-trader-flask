@@ -7,4 +7,4 @@ A game to test your stock trading skills with real data from the IEX API
 
 Stock Trader is a Flask application that uses SQLAlchemy to manage a PostgreSQL database.
 
-It's deployed to Heroku. You can play it today!
+It's [deployed to Heroku](https://stocktrader39.herokuapp.com). You can play it today!
