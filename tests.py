@@ -15,14 +15,9 @@ class MyTest(TestCase):
     def setUp(self):
         db.create_all()
 
-    def tearDown(self):
-        db.session.remove()
-        db.drop_all()
-
-    def test_db_connection(self):
-        """Create an instance of all models and add to db"""
+    def populateTestDb(self):
         user = q.User(
-                username="test", 
+                username="user", 
                 password_hash="test"
                 )
         transaction = q.Transaction(
@@ -31,15 +26,24 @@ class MyTest(TestCase):
                 quantity=1,
                 price=1
                 )
-        stock = q.Stock(
-                symbol='a',
-                name='a'
+        a = q.Stock(
+                symbol='aaa',
+                name='aaa'
+                )
+        b = q.Stock(
+                symbol='bbb',
+                name='bbb'
                 )
         db.session.add(user)
         db.session.add(transaction)
-        db.session.add(stock)
+        db.session.add(a)
+        db.session.add(b)
         db.session.commit()
-        assert user in db.session
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+
 
     def test_delete_transaction(self):
         """Deletes all transactions for given user"""
@@ -66,9 +70,33 @@ class MyTest(TestCase):
         q.insert_user('a', 'a')
         assert sum(1 for u in q.User.query.all()) == 1
 
-    def test_select_user_id(self):
-        a = q.User(username='a', password_hash='a')
-        db.session.add(a)
-        db.session.commit()
-        a = q.User.query.first()
-        assert a == q.select_user_by_id(a.id)
+    def test_select_user_by_id(self):
+        """Get a user based on ID"""
+        self.populateTestDb()
+        assert q.User.query.first() == q.select_user_by_id(1)
+
+    def test_select_user_by_username(self):
+        """Get a user by username"""
+        self.populateTestDb()
+        assert q.User.query.first() == q.select_user_by_username('user')
+
+    def test_select_stock_by_symbol(self):
+        """Get a stock by symbol"""
+        self.populateTestDb()
+        assert q.Stock.query.first() == q.select_stock_by_symbol('aaa')
+
+    def test_select_stocks_by_user(self):
+        """Get a sum of user's stocks"""
+        self.populateTestDb()
+        assert (1.0, 'aaa', 'aaa') in q.select_stocks_by_user(1)
+
+    def test_select_transactions_by_user(self):
+        """Get a user's transactions"""
+        self.populateTestDb()
+        assert 'aaa' in q.select_transactions_by_user(1)[0]
+
+    def test_select_transactions_by_stock(self):
+        """Get sum of users transactions of a stock"""
+        self.populateTestDb()
+        assert sum(q.select_transactions_by_stock(1, 1)) == 1
+

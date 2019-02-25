@@ -1,3 +1,11 @@
+# coverage
+htmlcov/
+.coverage
+.coveragerc
+
+# PyLint
+lint/
+
 # Vim
 *.swp
 

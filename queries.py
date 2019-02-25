@@ -64,14 +64,14 @@ def select_transactions_by_user(user_id):
             ).all())
 
 
-def select_transactions_by_stock(stock, user_id):
+def select_transactions_by_stock(stock_id, user_id):
     """Get the sum of all a user's transactions of a certain stock"""
     return (db.session.query(
                 func.sum(Transaction.quantity).label('shares')
             ).group_by(
                 Transaction.stock_id    
             ).filter(
-                Transaction.stock_id == stock.id,
+                Transaction.stock_id == stock_id,
                 Transaction.user_id == user_id
             ).one())
 

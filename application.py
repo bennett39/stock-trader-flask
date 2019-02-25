@@ -204,7 +204,7 @@ def sell():
         if not quote: return apology("No such company")
 
         stock = q.select_stock_by_symbol(symbol)
-        position = q.select_transactions_by_stock(stock,
+        position = q.select_transactions_by_stock(stock.id,
                 session['user_id'])
         try: 
             stock.id
