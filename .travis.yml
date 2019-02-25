@@ -1,6 +1,8 @@
 language: python
 python:
   - 3.6
+env:
+  - SECRET_KEY="blg4&80#kk7"
 install:
   - pip install --upgrade pip
   - pip install -r requirements.txt
