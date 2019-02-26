@@ -6,16 +6,22 @@ from config import create_app, db
 import queries as q
 
 class MyTest(TestCase):
+    """Complete Flask-Testing test suite"""
+
+    ### Config ###
     def create_app(self):
+        """Start new instance of app & initialize db"""
         app = create_app("sqlite://")
         app.config['TESTING'] = True
         db.init_app(app)
         return app
 
     def setUp(self):
+        """Create db models in test db"""
         db.create_all()
 
     def populateTestDb(self):
+        """Optional: populate db with test data"""
         user = q.User(
                 username="user", 
                 password_hash="test"
@@ -41,10 +47,11 @@ class MyTest(TestCase):
         db.session.commit()
 
     def tearDown(self):
+        """Clear db between tests"""
         db.session.remove()
         db.drop_all()
 
-
+    ### queries.py ###
     def test_delete_transaction(self):
         """Deletes all transactions for given user"""
         a = q.Transaction(user_id=1, stock_id=1, quantity=1, price=1)
@@ -100,3 +107,38 @@ class MyTest(TestCase):
         self.populateTestDb()
         assert sum(q.select_transactions_by_stock(1, 1)) == 1
 
+    def test_update_user_cash(self):
+        """Add amount to user cash"""
+        self.populateTestDb()
+        q.update_user_cash(999, 1)
+        assert q.User.query.first().cash == 10999
+
+    def test_update_user_hash(self):
+        """Update user's password hash"""
+        self.populateTestDb()
+        q.update_user_hash('baz', 1)
+        assert q.User.query.first().password_hash == 'baz'
+
+
+    ### models.py ###
+    def test_user_repr(self):
+        """Test __repr__ in User model"""
+        assert repr(
+                q.User(
+                    username='foo', 
+                    password_hash='bar')
+                ) == "<User foo>"
+
+    def test_stock_repr(self):
+        """Test __repr__ in Stock model"""
+        assert repr(
+                q.Stock(
+                    symbol='foo', 
+                    name='bar')
+                ) == "<Stock foo>"
+
+    def test_transaction_repr(self):
+        """Test __repr__ in Transaction model"""
+        self.populateTestDb()
+        assert (repr(q.Transaction.query.first())
+                == "<Transaction <User user>: <Stock aaa>>")
