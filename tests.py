@@ -3,6 +3,7 @@ from flask_testing import TestCase
 from flask_sqlalchemy import SQLAlchemy
 
 from config import create_app, db
+import helpers as h
 import queries as q
 
 class MyTest(TestCase):
@@ -33,12 +34,12 @@ class MyTest(TestCase):
                 price=1
                 )
         a = q.Stock(
-                symbol='aaa',
-                name='aaa'
+                symbol='AAPL',
+                name='Apple'
                 )
         b = q.Stock(
-                symbol='bbb',
-                name='bbb'
+                symbol='BIDU',
+                name='Baidu'
                 )
         db.session.add(user)
         db.session.add(transaction)
@@ -90,17 +91,17 @@ class MyTest(TestCase):
     def test_select_stock_by_symbol(self):
         """Get a stock by symbol"""
         self.populateTestDb()
-        assert q.Stock.query.first() == q.select_stock_by_symbol('aaa')
+        assert q.Stock.query.first() == q.select_stock_by_symbol('AAPL')
 
     def test_select_stocks_by_user(self):
         """Get a sum of user's stocks"""
         self.populateTestDb()
-        assert (1.0, 'aaa', 'aaa') in q.select_stocks_by_user(1)
+        assert (1.0, 'Apple', 'AAPL') in q.select_stocks_by_user(1)
 
     def test_select_transactions_by_user(self):
         """Get a user's transactions"""
         self.populateTestDb()
-        assert 'aaa' in q.select_transactions_by_user(1)[0]
+        assert 'AAPL' in q.select_transactions_by_user(1)[0]
 
     def test_select_transactions_by_stock(self):
         """Get sum of users transactions of a stock"""
@@ -141,4 +142,43 @@ class MyTest(TestCase):
         """Test __repr__ in Transaction model"""
         self.populateTestDb()
         assert (repr(q.Transaction.query.first())
-                == "<Transaction <User user>: <Stock aaa>>")
+                == "<Transaction <User user>: <Stock AAPL>>")
+
+
+    ### helpers.py ###
+
+    # TODO - test apology, login_required w/ client-side render_template
+    
+    def test_build_history(self):
+        """Create dictionary from user transaction history"""
+        self.populateTestDb()
+        history = h.build_history(q.select_transactions_by_user(1))
+        assert 'name' in history[1]
+        assert 'price' in history[1]
+        assert 'time' in history[1]
+        
+    def test_build_portfolio(self):
+        """Create portfolio w/ current prices from user stocks"""
+        self.populateTestDb()
+        portfolio = h.build_portfolio(
+                q.select_stocks_by_user(1),
+                9999
+                )
+        assert 'stocks' in portfolio
+        assert 'AAPL' in portfolio['stocks']
+        assert 'name' in portfolio['stocks']['AAPL']
+        assert 'value' in portfolio['stocks']['AAPL']
+        assert 'cash' in portfolio
+        assert 'total' in portfolio
+
+    def test_usd(self):
+        """Format value as USD string"""
+        assert h.usd(800) == "$800.00"
+        assert h.usd(0) == "$0.00"
+        assert h.usd(9.99) == "$9.99"
+
+    ### config.py ###
+    # TODO - Test after_request with HTTP client
+
+    ### aplication.py ###
+    # TODO - Test all routes with HTTP client
