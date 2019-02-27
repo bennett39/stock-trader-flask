@@ -91,7 +91,7 @@ def login():
 
         user = q.select_user_by_username(username)
         try:
-            if h.check_password_hash(user.password_hash, password):
+            if check_password_hash(user.password_hash, password):
                 session['user_id'] = user.id
                 return redirect('/')
             else:
@@ -139,8 +139,8 @@ def profile():
             return h.apology("New password and confirmation don't match")
 
         user = q.select_user_by_id(session['user_id'])
-        if h.check_password_hash(user.password_hash, password):
-            new_hash = h.generate_password_hash(new_password)
+        if check_password_hash(user.password_hash, password):
+            new_hash = generate_password_hash(new_password)
             q.update_user_hash(new_hash, session['user_id'])
             return redirect('/login')
         else:
@@ -189,7 +189,7 @@ def register():
         elif password != confirmation:
             return h.apology("Password doesn't match confirmation")
 
-        password_hash = h.generate_password_hash(password)
+        password_hash = generate_password_hash(password)
 
         try:
             q.insert_user(username, password_hash)

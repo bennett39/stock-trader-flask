@@ -1,8 +1,14 @@
+import os
+import tempfile
 import urllib
-from flask_testing import TestCase
+
+from flask_testing import TestCase, LiveServerTestCase
 from flask_sqlalchemy import SQLAlchemy
+import pytest
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from config import create_app, db
+from application import app
 import helpers as h
 import queries as q
 
@@ -24,23 +30,19 @@ class MyTest(TestCase):
     def populateTestDb(self):
         """Optional: populate db with test data"""
         user = q.User(
-                username="user", 
-                password_hash="test"
-                )
+                username="user",
+                password_hash="test")
         transaction = q.Transaction(
                 user_id=1,
                 stock_id=1,
                 quantity=1,
-                price=1
-                )
+                price=1)
         a = q.Stock(
                 symbol='AAPL',
-                name='Apple'
-                )
+                name='Apple')
         b = q.Stock(
                 symbol='BIDU',
-                name='Baidu'
-                )
+                name='Baidu')
         db.session.add(user)
         db.session.add(transaction)
         db.session.add(a)
@@ -126,7 +128,7 @@ class MyTest(TestCase):
         """Test __repr__ in User model"""
         assert repr(
                 q.User(
-                    username='foo', 
+                    username='foo',
                     password_hash='bar')
                 ) == "<User foo>"
 
@@ -134,7 +136,7 @@ class MyTest(TestCase):
         """Test __repr__ in Stock model"""
         assert repr(
                 q.Stock(
-                    symbol='foo', 
+                    symbol='foo',
                     name='bar')
                 ) == "<Stock foo>"
 
@@ -146,9 +148,6 @@ class MyTest(TestCase):
 
 
     ### helpers.py ###
-
-    # TODO - test apology, login_required w/ client-side render_template
-    
     def test_build_history(self):
         """Create dictionary from user transaction history"""
         self.populateTestDb()
@@ -156,7 +155,7 @@ class MyTest(TestCase):
         assert 'name' in history[1]
         assert 'price' in history[1]
         assert 'time' in history[1]
-        
+
     def test_build_portfolio(self):
         """Create portfolio w/ current prices from user stocks"""
         self.populateTestDb()
@@ -176,6 +175,33 @@ class MyTest(TestCase):
         assert h.usd(800) == "$800.00"
         assert h.usd(0) == "$0.00"
         assert h.usd(9.99) == "$9.99"
+
+
+@pytest.fixture
+def client():
+    db_fd, app.config['DATABASE'] = tempfile.mkstemp()
+    app.config['TESTING'] = True
+    client = app.test_client()
+
+    with app.app_context():
+        db.init_app(app)
+        db.create_all()
+        db.session.add(q.User(
+            username='foo',
+            password_hash=generate_password_hash('bar')
+            ))
+
+    yield client
+
+    os.close(db_fd)
+    os.unlink(app.config['DATABASE'])
+
+
+def test_empty_db(client):
+    assert b'Log In' in client.get('/login').data
+
+    ### helpers.py ###
+    # TODO - test apology, login_required w/ client-side render_template
 
     ### config.py ###
     # TODO - Test after_request with HTTP client
