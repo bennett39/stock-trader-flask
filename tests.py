@@ -7,8 +7,8 @@ from flask_sqlalchemy import SQLAlchemy
 import pytest
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from config import create_app, db
-from application import app
+from config import create_app
+from application import app, db
 import helpers as h
 import queries as q
 
@@ -18,7 +18,7 @@ class MyTest(TestCase):
     ### Config ###
     def create_app(self):
         """Start new instance of app & initialize db"""
-        app = create_app("sqlite://")
+        app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite://"
         app.config['TESTING'] = True
         db.init_app(app)
         return app
@@ -176,35 +176,48 @@ class MyTest(TestCase):
         assert h.usd(0) == "$0.00"
         assert h.usd(9.99) == "$9.99"
 
+    def test_login_page(self):
+        response = self.client.get('/login')
+        assert b'Log In' in response.data
 
-@pytest.fixture
-def client():
-    db_fd, app.config['DATABASE'] = tempfile.mkstemp()
-    app.config['TESTING'] = True
-    client = app.test_client()
-
-    with app.app_context():
-        db.init_app(app)
-        db.create_all()
-        db.session.add(q.User(
-            username='foo',
-            password_hash=generate_password_hash('bar')
-            ))
-
-    yield client
-
-    os.close(db_fd)
-    os.unlink(app.config['DATABASE'])
+    def test_register_page(self):
+        response = self.client.get('/register')
+        assert b'Create a New Account' in response.data
 
 
-def test_empty_db(client):
-    assert b'Log In' in client.get('/login').data
+#  @pytest.fixture
+#  def client():
+    #  db_fd, app.config['database'] = tempfile.mkstemp()
+    #  app.config['testing'] = true
+    #  client = app.test_client()
 
-    ### helpers.py ###
-    # TODO - test apology, login_required w/ client-side render_template
+    #  with app.app_context():
+        #  db.init_app(app)
 
-    ### config.py ###
-    # TODO - Test after_request with HTTP client
+    #  yield client
 
-    ### aplication.py ###
-    # TODO - Test all routes with HTTP client
+    #  os.close(db_fd)
+    #  os.unlink(app.config['database'])
+
+#  def test_login_get(client):
+    #  assert b'Log In' in client.get('/login').data
+
+#  def test_register_get(client):
+    #  assert b'create a new account' in client.get('/register').data
+
+#  # todo - test login
+
+#  def logout(client):
+    #  return client.get('/logout', follow_redirects=true)
+
+#  def test_logout(client):
+    #  assert b'Log In' in logout(client).data
+
+#  ### helpers.py ###
+#  # TODO - test apology, login_required w/ client-side render_template
+
+#  ### config.py ###
+#  # TODO - test after_request with http client
+
+#  ### aplication.py ###
+#  # TODO - Test all routes with HTTP client
