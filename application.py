@@ -5,21 +5,20 @@ from werkzeug.exceptions import default_exceptions
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from config import app, db
-from helpers import apology, build_history, build_portfolio,\
-            get_stocks, login_required, lookup, usd
 from stocks import stocks
+import helpers as h
 import queries as q
 
-app.jinja_env.filters['usd'] = usd
-
+app.jinja_env.filters['usd'] = h.usd
+login_required = h.login_required
 
 @app.route('/')
 @login_required
 def index():
     """Show portfolio of user's stocks"""
     user = q.select_user_by_id(session['user_id'])
-    portfolio = build_portfolio(
-            q.select_stocks_by_user(user.id), 
+    portfolio = h.build_portfolio(
+            q.select_stocks_by_user(user.id),
             user.cash)
 
     return render_template("index.html", portfolio=portfolio,
@@ -34,13 +33,14 @@ def buy():
         symbol = request.form.get('symbol')
         shares= request.form.get('shares')
 
-        if not symbol: 
-            return apology("Provide a symbol")
+        if not symbol:
+            return h.apology("Provide a symbol")
         elif not shares.isdigit():
-            return apology("Provide a valid quantity")
+            return h.apology("Provide a valid quantity")
 
-        quote = lookup(symbol)
-        if not quote: return apology("No such company")
+        quote = h.lookup(symbol)
+        if not quote:
+            return h.apology("No such company")
 
         order_total = float(shares) * float(quote['price'])
         user = q.select_user_by_id(session['user_id'])
@@ -51,20 +51,29 @@ def buy():
             except AttributeError:
                 q.insert_stock(quote['symbol'], quote['name'])
                 stock = q.select_stock_by_symbol(quote['symbol'])
-            q.insert_transaction(session['user_id'], stock.id, shares,
-                    quote['price'])
+            q.insert_transaction(
+                    session['user_id'],
+                    stock.id,
+                    shares,
+                    quote['price']
+                    )
             q.update_user_cash(order_total*-1, session['user_id'])
             return redirect('/')
-        return apology("Not enough cash")
-    else: return render_template('buy.html', stocks=stocks)
+        return h.apology("Not enough cash")
+    else:
+        return render_template('buy.html', stocks=stocks)
 
 
 @app.route('/history')
 @login_required
 def history():
     """Show history of transactions"""
-    history = dict(sorted(build_history(
-            q.select_transactions_by_user(session['user_id'])).items()))
+    history = dict(sorted(
+        h.build_history(
+            q.select_transactions_by_user(
+                session['user_id']
+            )).items()
+        ))
     return render_template('history.html', history=history)
 
 
@@ -77,18 +86,20 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
 
-        if not username: return apology("Must provide username")
-        elif not password: return apology("Must provide password")
+        if not username: return h.apology("Must provide username")
+        elif not password: return h.apology("Must provide password")
 
-        user = q.select_user_by_username(username) 
-        try: 
-            if check_password_hash(user.password_hash, password):
+        user = q.select_user_by_username(username)
+        try:
+            if h.check_password_hash(user.password_hash, password):
                 session['user_id'] = user.id
                 return redirect('/')
-            else: return apology("Incorrect password")
-        except AttributeError: return apology("No such user")
-        
-    else: return render_template("login.html")
+            else:
+                return h.apology("Incorrect password")
+        except AttributeError:
+            return h.apology("No such user")
+    else:
+        return render_template("login.html")
 
 
 @app.route('/logout')
@@ -105,7 +116,7 @@ def nuke():
     if request.method == 'POST':
         confirm = request.form.get('yesno')
         if not confirm or confirm == 'no':
-            return apology("Ok, we won't reset your portfolio")
+            return h.apology("Ok, we won't reset your portfolio")
         if confirm == 'yes':
             q.delete_transactions_by_user(session['user_id'])
             user = q.select_user_by_id(session['user_id'])
@@ -123,36 +134,38 @@ def profile():
         new_password = request.form.get('new')
         confirmation = request.form.get('confirmation')
         if not password or not new_password or not confirmation:
-            return apology("Please fill all fields")
+            return h.apology("Please fill all fields")
         elif new_password != confirmation:
-            return apology("New password and confirmation don't match")
+            return h.apology("New password and confirmation don't match")
 
         user = q.select_user_by_id(session['user_id'])
-        if check_password_hash(user.password_hash, password):
-            new_hash = generate_password_hash(new_password)
+        if h.check_password_hash(user.password_hash, password):
+            new_hash = h.generate_password_hash(new_password)
             q.update_user_hash(new_hash, session['user_id'])
             return redirect('/login')
         else:
-            return apology("Incorrect password")
+            return h.apology("Incorrect password")
     else:
         user = q.select_user_by_id(session['user_id'])
-        user.cash = usd(user.cash)
+        user.cash = h.usd(user.cash)
         return render_template('profile.html', user=user)
 
-        
+
 @app.route('/quote', methods=['GET', 'POST'])
 @login_required
 def quote():
     """Get stock quote"""
     if request.method == 'POST':
-        quote = lookup(request.form.get('symbol'))
-        
-        if not quote: return apology("Company doesn't exist.")
-        
-        return render_template('quoted.html', symbol=quote['symbol'],
-                price=quote['price'], name=quote['name']) 
-
-    else: 
+        quote = h.lookup(request.form.get('symbol'))
+        if not quote:
+            return h.apology("Company doesn't exist.")
+        return render_template(
+                'quoted.html',
+                symbol=quote['symbol'],
+                price=quote['price'],
+                name=quote['name']
+                )
+    else:
         return render_template('quote.html', stocks=stocks)
 
 
@@ -160,26 +173,28 @@ def quote():
 def register():
     """Register user"""
     session.clear()
-
     if request.method == 'POST':
         username, password, confirmation = (
-                request.form.get('username'), 
+                request.form.get('username'),
                 request.form.get('password'),
                 request.form.get('confirmation')
             )
 
-        if not username: return apology("Missing username")
-        elif not password: return apology("Missing password")
-        elif not confirmation: return apology("Missing confirmation")
-        elif password != confirmation: 
-            return apology("Password doesn't match confirmation")
+        if not username:
+            return h.apology("Missing username")
+        elif not password:
+            return h.apology("Missing password")
+        elif not confirmation:
+            return h.apology("Missing confirmation")
+        elif password != confirmation:
+            return h.apology("Password doesn't match confirmation")
 
-        password_hash = generate_password_hash(password)
-        
-        try: 
+        password_hash = h.generate_password_hash(password)
+
+        try:
             q.insert_user(username, password_hash)
         except Exception:
-            return apology("Username already exists")
+            return h.apology("Username already exists")
 
         session['user_id'] = q.select_user_by_username(username).id
 
@@ -195,36 +210,38 @@ def sell():
     if request.method == 'POST':
         symbol = request.form.get('symbol')
         shares = request.form.get('shares')
-        if not symbol: return apology("Provide a symbol")
+        if not symbol:
+            return h.apology("Provide a symbol")
         elif not shares.isdigit():
-            return apology("Provide a valid quantity")
+            return h.apology("Provide a valid quantity")
         shares = float(shares)
-
-        quote = lookup(symbol)
-        if not quote: return apology("No such company")
-
+        quote = h.lookup(symbol)
+        if not quote:
+            return h.apology("No such company")
         stock = q.select_stock_by_symbol(symbol)
-        position = q.select_transactions_by_stock(stock.id,
+        position = q.select_transactions_by_stock(
+                stock.id,
                 session['user_id'])
-        try: 
+        try:
             stock.id
             position.shares
-        except AttributeError: 
-            return apology("You don't own that stock")
-
+        except AttributeError:
+            return h.apology("You don't own that stock")
         if position.shares >= shares:
             order_total = shares * quote['price']
-            q.insert_transaction(session['user_id'], stock.id,
-                    shares*-1, quote['price'])
+            q.insert_transaction(
+                    session['user_id'],
+                    stock.id,
+                    shares*-1,
+                    quote['price'])
             q.update_user_cash(order_total, session['user_id'])
             return redirect('/')
         else:
-            return apology("You don't own enough of that stock.")
-
-    else: 
+            return h.apology("You don't own enough of that stock.")
+    else:
         user = q.select_user_by_id(session['user_id'])
-
-        return render_template('sell.html', 
-                portfolio=build_portfolio(
+        return render_template('sell.html',
+                portfolio=h.build_portfolio(
                     q.select_stocks_by_user(user.id),
-                    user.cash))
+                    user.cash)
+                )

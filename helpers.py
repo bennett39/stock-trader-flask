@@ -29,7 +29,7 @@ def build_portfolio(stocks, cash):
     """Build portfolio of current stock values."""
     portfolio = {
         'stocks': {},
-        'cash': usd(cash), 
+        'cash': usd(cash),
         'total': cash
     }
     for stock in stocks:
@@ -37,12 +37,12 @@ def build_portfolio(stocks, cash):
             portfolio['stocks'].pop(stock, None)
         else:
             price = lookup(stock.symbol)['price']
-            value = stock.quantity * price 
+            value = stock.quantity * price
             portfolio['stocks'][stock.symbol] = {
                 'name': stock.name,
                 'quantity': stock.quantity,
                 'price': usd(price),
-                'value': usd(value), 
+                'value': usd(value),
             }
             portfolio['total'] += value
     portfolio['total'] = usd(portfolio['total'])
@@ -85,36 +85,6 @@ def lookup(symbol):
         }
     except (KeyError, TypeError, ValueError):
         return None
-
-
-def get_stocks():
-    """
-    Look up all available symbols listed on IEX.
-    https://iextrading.com/developer/docs/
-    """
-    # Contact API
-    try:
-        response = requests.get(
-                "https://api.iextrading.com/1.0/ref-data/symbols")
-        response.raise_for_status()
-    except requests.RequestException:
-        return None
-
-    # Parse response
-    try:
-        stocks = response.json()
-        for stock in stocks:
-            if stock['type'] != 'cs' or stock['isEnabled'] == False:
-                stocks.remove(stock)
-            else:
-                stock.pop('date')
-                stock.pop('isEnabled')
-                stock.pop('type')
-                stock.pop('iexId')
-        return stocks
-    except (KeyError, TypeError, ValueError):
-        return None
-
 
 
 def usd(value):
