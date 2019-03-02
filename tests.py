@@ -170,6 +170,25 @@ class MyTest(TestCase):
         assert 'cash' in portfolio
         assert 'total' in portfolio
 
+    def test_build_portfolio_negative_quantity(self):
+        """Build Portfolio should exclude stocks that've been sold"""
+        self.populateTestDb()
+        transaction = q.Transaction(
+                user_id=1,
+                stock_id=1,
+                quantity=-1,
+                price=1)
+        db.session.add(transaction)
+        db.session.commit()
+        portfolio = h.build_portfolio(
+            q.select_stocks_by_user(1),
+            9999,
+        )
+        assert 'AAPL' not in portfolio['stocks']
+        assert 'cash' in portfolio
+        assert 'total' in portfolio
+
+
     def test_usd(self):
         """Format value as USD string"""
         assert h.usd(800) == "$800.00"
