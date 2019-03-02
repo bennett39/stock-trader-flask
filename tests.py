@@ -2,6 +2,7 @@ import os
 import tempfile
 import urllib
 
+import flask
 from flask_testing import TestCase, LiveServerTestCase
 from flask_sqlalchemy import SQLAlchemy
 import pytest
@@ -196,16 +197,24 @@ class MyTest(TestCase):
         assert h.usd(9.99) == "$9.99"
 
     def test_login_page(self):
+        """Login route renders the login page"""
         response = self.client.get('/login')
         assert b'Log In' in response.data
 
     def test_register_page(self):
+        """Register route renders register page"""
         response = self.client.get('/register')
         assert b'Create a New Account' in response.data
 
     def test_logout(self):
-        response = self.client.get('/logout', follow_redirects=True)
-        assert b'Log In' in response.data
+        """Logout clears the session"""
+        with self.client.session_transaction() as sess:
+            sess['user_id'] = 1
+            sess.modified = True
+            assert 'user_id' in sess
+        self.client.get('/logout', follow_redirects=True)
+        with self.client.session_transaction() as sess:
+            assert 'user_id' not in sess
 
     def test_login(self):
         self.populateTestDb()
@@ -216,6 +225,7 @@ class MyTest(TestCase):
             },
             follow_redirects=True,
         )
+        print(response.data)
         assert b'Your Portfolio' in response.data
 
 #  ### helpers.py ###

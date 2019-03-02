@@ -105,7 +105,7 @@ def login():
 @app.route('/logout')
 def logout():
     """Log user out"""
-    session.clear()
+    [session.pop(key) for key in list(session.keys())]
     return redirect('/login')
 
 
