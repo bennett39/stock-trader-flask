@@ -5,7 +5,7 @@ import urllib
 from flask_testing import TestCase, LiveServerTestCase
 from flask_sqlalchemy import SQLAlchemy
 import pytest
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import generate_password_hash
 
 from config import create_app
 from application import app, db
@@ -31,7 +31,7 @@ class MyTest(TestCase):
         """Optional: populate db with test data"""
         user = q.User(
                 username="user",
-                password_hash="test")
+                password_hash=generate_password_hash("test"))
         transaction = q.Transaction(
                 user_id=1,
                 stock_id=1,
@@ -184,36 +184,39 @@ class MyTest(TestCase):
         response = self.client.get('/register')
         assert b'Create a New Account' in response.data
 
+    def test_logout(self):
+        response = self.client.get('/logout', follow_redirects=True)
+        assert b'Log In' in response.data
 
-#  @pytest.fixture
-#  def client():
-    #  db_fd, app.config['database'] = tempfile.mkstemp()
-    #  app.config['testing'] = true
-    #  client = app.test_client()
-
-    #  with app.app_context():
-        #  db.init_app(app)
-
-    #  yield client
-
-    #  os.close(db_fd)
-    #  os.unlink(app.config['database'])
-
-#  def test_login_get(client):
-    #  assert b'Log In' in client.get('/login').data
-
-#  def test_register_get(client):
-    #  assert b'create a new account' in client.get('/register').data
-
-#  # todo - test login
-
-#  def logout(client):
-    #  return client.get('/logout', follow_redirects=true)
-
-#  def test_logout(client):
-    #  assert b'Log In' in logout(client).data
+    def test_login(self):
+        self.populateTestDb()
+        response = self.client.post(
+            '/login', data={
+                'username': 'user',
+                'password': 'test',
+            },
+            follow_redirects=True,
+        )
+        assert b'Your Portfolio' in response.data
 
 #  ### helpers.py ###
+    def test_apology(self):
+        self.populateTestDb()
+        response = self.client.post(
+            '/login', data={
+                'username': 'user',
+                'password': 'incorrect',
+            },
+            follow_redirects=True,
+        )
+        assert b'Error' in response.data
+
+    def test_login_required(self):
+        with self.client.session_transaction() as sess:
+            sess['user_id'] = None
+        response = self.client.get('/', follow_redirects=True)
+        assert b'Log In' in response.data
+
 #  # TODO - test apology, login_required w/ client-side render_template
 
 #  ### config.py ###
