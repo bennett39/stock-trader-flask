@@ -163,7 +163,7 @@ def quote():
                 'quoted.html',
                 symbol=quote['symbol'],
                 price=quote['price'],
-                name=quote['name']
+                name=quote['name'],
                 )
     else:
         return render_template('quote.html', stocks=stocks)

@@ -319,3 +319,27 @@ class MyTest(TestCase):
         self.startSession()
         response = self.client.get('/quote')
         assert b'Quote' in response.data
+
+    def test_register_post(self):
+        response = self.client.post('/register', data={
+            'username': 'new',
+            'password': 'foo',
+            'confirmation': 'foo',
+            }, follow_redirects=True)
+        assert q.select_user_by_username('new').id == 1
+
+    def test_sell_post(self):
+        self.populateTestDb()
+        self.startSession()
+        response = self.client.post('/sell', data={
+            'symbol': 'AAPL',
+            'shares': 1,
+            }, follow_redirects=True)
+        assert b'Your Portfolio' in response.data
+
+    def test_sell_get(self):
+        self.populateTestDb()
+        self.startSession()
+        response = self.client.get('/sell')
+        assert b'Sell Stocks' in response.data
+
