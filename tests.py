@@ -218,6 +218,12 @@ class MyTest(TestCase):
 
 
     ### application.py ###
+    def startSession(self):
+        with self.client.session_transaction() as sess:
+            sess['user_id'] = 1
+            sess.modified = True
+            assert 'user_id' in sess
+
     def test_login_page(self):
         """Login route renders the login page"""
         response = self.client.get('/login')
@@ -230,10 +236,7 @@ class MyTest(TestCase):
 
     def test_logout(self):
         """Logout clears the session"""
-        with self.client.session_transaction() as sess:
-            sess['user_id'] = 1
-            sess.modified = True
-            assert 'user_id' in sess
+        self.startSession()
         self.client.get('/logout', follow_redirects=True)
         with self.client.session_transaction() as sess:
             assert 'user_id' not in sess
@@ -250,3 +253,20 @@ class MyTest(TestCase):
         )
         print(response.data)
         assert b'Your Portfolio' in response.data
+
+    def test_buy_post(self):
+        """User can buy a new stock"""
+        self.populateTestDb()
+        self.startSession()
+        response = self.client.post('/buy', data={
+            'symbol': 'TSLA',
+            'shares': 1,
+        }, follow_redirects=True)
+        assert b'Tesla' in response.data
+
+    def test_buy_get(self):
+        self.startSession()
+        response = self.client.get('/buy')
+        assert b'aldishfaspoih' in response.data
+
+
