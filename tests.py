@@ -265,8 +265,57 @@ class MyTest(TestCase):
         assert b'Tesla' in response.data
 
     def test_buy_get(self):
+        """User sees a buy form via GET"""
         self.startSession()
         response = self.client.get('/buy')
-        assert b'aldishfaspoih' in response.data
+        assert b'Buy' in response.data
 
+    def test_history(self):
+        """App builds and displays user transaction history"""
+        self.populateTestDb()
+        self.startSession()
+        response = self.client.get('/history')
+        assert b'Apple' in response.data
 
+    def test_nuke_post(self):
+        """Nuking resets user portfolio"""
+        self.populateTestDb()
+        self.startSession()
+        response = self.client.post('/nuke', data={
+            'yesno': 'yes',
+        }, follow_redirects=True)
+        assert b'$10,000' in response.data
+
+    def test_nuke_get(self):
+        self.populateTestDb()
+        self.startSession()
+        response = self.client.get('/nuke', follow_redirects=True)
+        assert b'Your Profile' in response.data
+
+    def test_profile_post(self):
+        self.populateTestDb()
+        self.startSession()
+        response = self.client.post('/profile', data={
+            'password': 'test',
+            'new': 'reset',
+            'confirmation': 'reset',
+            }, follow_redirects=True)
+        assert b'Log In' in response.data
+
+    def test_profile_get(self):
+        self.populateTestDb()
+        self.startSession()
+        response = self.client.get('/profile')
+        assert b'Your Profile' in response.data
+
+    def test_quote_post(self):
+        self.startSession()
+        response = self.client.post('/quote', data={
+            'symbol': 'GOOG',
+            }, follow_redirects=True)
+        assert b'Alphabet' in response.data
+
+    def test_quote_get(self):
+        self.startSession()
+        response = self.client.get('/quote')
+        assert b'Quote' in response.data
