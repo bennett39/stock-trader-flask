@@ -189,13 +189,35 @@ class MyTest(TestCase):
         assert 'cash' in portfolio
         assert 'total' in portfolio
 
-
     def test_usd(self):
         """Format value as USD string"""
         assert h.usd(800) == "$800.00"
         assert h.usd(0) == "$0.00"
         assert h.usd(9.99) == "$9.99"
 
+
+    ### helpers.py ###
+    def test_apology(self):
+        """Bad password renders an apology"""
+        self.populateTestDb()
+        response = self.client.post(
+            '/login', data={
+                'username': 'user',
+                'password': 'incorrect',
+            },
+            follow_redirects=True,
+        )
+        assert b'Error' in response.data
+
+    def test_login_required(self):
+        """Users who aren't logged in get redirected"""
+        with self.client.session_transaction() as sess:
+            sess['user_id'] = None
+        response = self.client.get('/', follow_redirects=True)
+        assert b'Log In' in response.data
+
+
+    ### application.py ###
     def test_login_page(self):
         """Login route renders the login page"""
         response = self.client.get('/login')
@@ -217,6 +239,7 @@ class MyTest(TestCase):
             assert 'user_id' not in sess
 
     def test_login(self):
+        """Login sucessful and redirect to home page"""
         self.populateTestDb()
         response = self.client.post(
             '/login', data={
@@ -227,29 +250,3 @@ class MyTest(TestCase):
         )
         print(response.data)
         assert b'Your Portfolio' in response.data
-
-#  ### helpers.py ###
-    def test_apology(self):
-        self.populateTestDb()
-        response = self.client.post(
-            '/login', data={
-                'username': 'user',
-                'password': 'incorrect',
-            },
-            follow_redirects=True,
-        )
-        assert b'Error' in response.data
-
-    def test_login_required(self):
-        with self.client.session_transaction() as sess:
-            sess['user_id'] = None
-        response = self.client.get('/', follow_redirects=True)
-        assert b'Log In' in response.data
-
-#  # TODO - test apology, login_required w/ client-side render_template
-
-#  ### config.py ###
-#  # TODO - test after_request with http client
-
-#  ### aplication.py ###
-#  # TODO - Test all routes with HTTP client
