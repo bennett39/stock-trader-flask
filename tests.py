@@ -233,6 +233,44 @@ class MyTest(TestCase):
         }, follow_redirects=True)
         assert b'Tesla' in response.data
 
+    def test_buy_error_symbol(self):
+        """Renders error when no symbol provided"""
+        self.populateTestDb()
+        self.startSession()
+        response = self.client.post('/buy', data={
+            'shares': 1,
+        }, follow_redirects=True)
+        assert b'Provide a symbol' in response.data
+
+    def test_buy_error_quantity(self):
+        """Renders error when no quantity provided"""
+        self.populateTestDb()
+        self.startSession()
+        response = self.client.post('/buy', data={
+            'symbol': 'TSLA',
+        }, follow_redirects=True)
+        assert b'Provide a valid quantity' in response.data
+
+    def test_buy_error_invalid_company(self):
+        """Renders error when company doesn't exist in IEX records"""
+        self.populateTestDb()
+        self.startSession()
+        response = self.client.post('/buy', data={
+            'symbol': 'FOOBAR',
+            'shares': 1,
+        }, follow_redirects=True)
+        assert b'No such company' in response.data
+
+    def test_buy_error_insufficient_funds(self):
+        """Renders error when user doesn't have enough money"""
+        self.populateTestDb()
+        self.startSession()
+        response = self.client.post('/buy', data={
+            'symbol': 'GOOG',
+            'shares': 10000,
+        }, follow_redirects=True)
+        assert b'Not enough cash' in response.data
+
     def test_buy_get(self):
         """User sees a buy form via GET"""
         self.startSession()

@@ -35,7 +35,7 @@ def buy():
 
         if not symbol:
             return h.apology("Provide a symbol")
-        elif not shares.isdigit():
+        elif not shares or not shares.isdigit():
             return h.apology("Provide a valid quantity")
 
         quote = h.lookup(symbol)
