@@ -293,6 +293,15 @@ class MyTest(TestCase):
         }, follow_redirects=True)
         assert b'$10,000' in response.data
 
+    def test_nuke_error_no_conf(self):
+        """Nuking resets user portfolio"""
+        self.populateTestDb()
+        self.startSession()
+        response = self.client.post('/nuke', data={
+            'yesno': 'no',
+        }, follow_redirects=True)
+        assert b'reset your portfolio' in response.data
+
     def test_nuke_get(self):
         """Nuke via get redirects to /profile"""
         self.populateTestDb()
@@ -311,6 +320,38 @@ class MyTest(TestCase):
             }, follow_redirects=True)
         assert b'Log In' in response.data
 
+    def test_profile_error_incomplete(self):
+        """Renders error if all fields aren't filled"""
+        self.populateTestDb()
+        self.startSession()
+        response = self.client.post('/profile', data={
+            'password': 'test',
+            'new': 'reset',
+            }, follow_redirects=True)
+        assert b'Please fill all fields' in response.data
+
+    def test_profile_error_no_match(self):
+        """Renders error when new password doesn't match confimation"""
+        self.populateTestDb()
+        self.startSession()
+        response = self.client.post('/profile', data={
+            'password': 'test',
+            'new': 'reset',
+            'confirmation': 'incorrect',
+            }, follow_redirects=True)
+        assert b'New password and confirmation don' in response.data
+
+    def test_profile_error_incorrect_password(self):
+        """Renders error when old password is incorrect during reset"""
+        self.populateTestDb()
+        self.startSession()
+        response = self.client.post('/profile', data={
+            'password': 'incorrect',
+            'new': 'reset',
+            'confirmation': 'reset',
+            }, follow_redirects=True)
+        assert b'Incorrect password' in response.data
+
     def test_profile_get(self):
         """Profile route loads profile page"""
         self.populateTestDb()
@@ -325,6 +366,14 @@ class MyTest(TestCase):
             'symbol': 'GOOG',
             }, follow_redirects=True)
         assert b'Alphabet' in response.data
+
+    def test_quote_error_invalid_company(self):
+        """Renders error when invalid symbol provided"""
+        self.startSession()
+        response = self.client.post('/quote', data={
+            'symbol': 'FOOBAR',
+            }, follow_redirects=True)
+        assert b'Company doesn' in response.data
 
     def test_quote_get(self):
         """Quote route renders quote page"""
@@ -407,6 +456,16 @@ class MyTest(TestCase):
             }, follow_redirects=True)
         assert b'match confirmation' in response.data
 
+    def test_register_error_user_already_exists(self):
+        """Renders error when username already exists"""
+        self.populateTestDb()
+        response = self.client.post('/register', data={
+            'username': 'user',
+            'password': 'foo',
+            'confirmation': 'foo',
+            }, follow_redirects=True)
+        assert b'Username already exists' in response.data
+
     def test_register_get(self):
         """Register route renders register page"""
         response = self.client.get('/register')
@@ -421,6 +480,52 @@ class MyTest(TestCase):
             'shares': 1,
             }, follow_redirects=True)
         assert b'Your Portfolio' in response.data
+
+    def test_sell_error_no_symbol(self):
+        """Renders error when no symbol is provided"""
+        self.startSession()
+        response = self.client.post('/sell', data={
+            'shares': 1,
+            }, follow_redirects=True)
+        assert b'Provide a symbol' in response.data
+
+    def test_sell_error_no_quantity(self):
+        """Renders error when no quantity provided"""
+        self.startSession()
+        response = self.client.post('/sell', data={
+            'symbol': 'AAPL',
+            }, follow_redirects=True)
+        assert b'Provide a valid quantity' in response.data
+
+    def test_sell_error_invalid_company(self):
+        """Renders error if company procided is invalid"""
+        self.startSession()
+        response = self.client.post('/sell', data={
+            'symbol': 'FOOBAR',
+            'shares': 1,
+            }, follow_redirects=True)
+        assert b'No such company' in response.data
+
+    def test_sell_error_doesnt_own(self):
+        """Renders error if user tries to sell stock they don't own"""
+        self.populateTestDb()
+        self.startSession()
+        response = self.client.post('/sell', data={
+            'symbol': 'F',
+            'shares': 1,
+            }, follow_redirects=True)
+        assert b't own that stock' in response.data
+
+    def test_sell_error_not_enough(self):
+        """Renders error if user tries to sell more stock than they own"""
+        self.populateTestDb()
+        self.startSession()
+        response = self.client.post('/sell', data={
+            'symbol': 'AAPL',
+            'shares': 5,
+            }, follow_redirects=True)
+        assert b't own enough of that stock' in response.data
+
 
     def test_sell_get(self):
         """Sell route renders sell page"""

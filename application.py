@@ -212,32 +212,30 @@ def sell():
         shares = request.form.get('shares')
         if not symbol:
             return h.apology("Provide a symbol")
-        elif not shares.isdigit():
+        elif not shares or not shares.isdigit():
             return h.apology("Provide a valid quantity")
         shares = float(shares)
         quote = h.lookup(symbol)
         if not quote:
             return h.apology("No such company")
-        stock = q.select_stock_by_symbol(symbol)
-        position = q.select_transactions_by_stock(
-                stock.id,
-                session['user_id'])
         try:
-            stock.id
-            position.shares
+            stock = q.select_stock_by_symbol(symbol)
+            position = q.select_transactions_by_stock(
+                    stock.id,
+                    session['user_id'])
+            if position.shares >= shares:
+                order_total = shares * quote['price']
+                q.insert_transaction(
+                        session['user_id'],
+                        stock.id,
+                        shares*-1,
+                        quote['price'])
+                q.update_user_cash(order_total, session['user_id'])
+                return redirect('/')
+            else:
+                return h.apology("You don't own enough of that stock.")
         except AttributeError:
             return h.apology("You don't own that stock")
-        if position.shares >= shares:
-            order_total = shares * quote['price']
-            q.insert_transaction(
-                    session['user_id'],
-                    stock.id,
-                    shares*-1,
-                    quote['price'])
-            q.update_user_cash(order_total, session['user_id'])
-            return redirect('/')
-        else:
-            return h.apology("You don't own enough of that stock.")
     else:
         user = q.select_user_by_id(session['user_id'])
         return render_template('sell.html',
