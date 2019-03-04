@@ -1,12 +1,18 @@
+sudo: false
 language: python
 python:
   - 3.6
 env:
-  - SECRET_KEY="blg4&80#kk7"
+  - SECRET_KEY="secretkey"
+  - CODECOV_TOKEN="daf8baef-fc96-41da-a404-6a44430114c2"
 install:
   - pip install --upgrade pip
   - pip install -r requirements.txt
   - pip install pytest
   - pip install Flask-Testing
+  - pip install coverage
+  - pip install codecov
 script:
-  - pytest tests.py
+  - coverage run -m pytest tests.py
+after_sucess:
+  - codecov
