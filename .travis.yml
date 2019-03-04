@@ -13,5 +13,4 @@ install:
   - pip install codecov
 script:
   - coverage run -m pytest tests.py
-after_sucess:
   - codecov --token=daf8baef-fc96-41da-a404-6a44430114c2
