@@ -1,6 +1,7 @@
 # stock-trader
 [![Build Status](https://travis-ci.org/bennett39/stock-trader.svg?branch=master)](https://travis-ci.org/bennett39/stock-trader)
 [![Dependency Status](https://img.shields.io/librariesio/github/bennett39/stock-trader.svg)](https://libraries.io/github/bennett39/stock-trader)
+[![Code Coverage](https://codecov.io/gh/bennett39/stock-trader/branch/master/graph/badge.svg)](https://codecov.io/gh/bennett39/stock-trader)
 
 A game to test your stock trading skills with real data from the IEX API
 
