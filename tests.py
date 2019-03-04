@@ -149,6 +149,25 @@ class MyTest(TestCase):
 
 
     ### helpers.py ###
+    def test_apology(self):
+        """Bad password renders an apology"""
+        self.populateTestDb()
+        response = self.client.post(
+            '/login', data={
+                'username': 'user',
+                'password': 'incorrect',
+            },
+            follow_redirects=True,
+        )
+        assert b'Error' in response.data
+
+    def test_login_required(self):
+        """Users who aren't logged in get redirected"""
+        with self.client.session_transaction() as sess:
+            sess['user_id'] = None
+        response = self.client.get('/', follow_redirects=True)
+        assert b'Log In' in response.data
+
     def test_build_history(self):
         """Create dictionary from user transaction history"""
         self.populateTestDb()
@@ -196,27 +215,6 @@ class MyTest(TestCase):
         assert h.usd(9.99) == "$9.99"
 
 
-    ### helpers.py ###
-    def test_apology(self):
-        """Bad password renders an apology"""
-        self.populateTestDb()
-        response = self.client.post(
-            '/login', data={
-                'username': 'user',
-                'password': 'incorrect',
-            },
-            follow_redirects=True,
-        )
-        assert b'Error' in response.data
-
-    def test_login_required(self):
-        """Users who aren't logged in get redirected"""
-        with self.client.session_transaction() as sess:
-            sess['user_id'] = None
-        response = self.client.get('/', follow_redirects=True)
-        assert b'Log In' in response.data
-
-
     ### application.py ###
     def startSession(self):
         """Initialize a user session for login_required routes"""
@@ -258,12 +256,14 @@ class MyTest(TestCase):
         assert b'$10,000' in response.data
 
     def test_nuke_get(self):
+        """Nuke via get redirects to /profile"""
         self.populateTestDb()
         self.startSession()
         response = self.client.get('/nuke', follow_redirects=True)
         assert b'Your Profile' in response.data
 
     def test_profile_post(self):
+        """Profile post updates user password & redirects to login"""
         self.populateTestDb()
         self.startSession()
         response = self.client.post('/profile', data={
@@ -274,12 +274,14 @@ class MyTest(TestCase):
         assert b'Log In' in response.data
 
     def test_profile_get(self):
+        """Profile route loads profile page"""
         self.populateTestDb()
         self.startSession()
         response = self.client.get('/profile')
         assert b'Your Profile' in response.data
 
     def test_quote_post(self):
+        """Requesting quote with valid symbol returns quote"""
         self.startSession()
         response = self.client.post('/quote', data={
             'symbol': 'GOOG',
@@ -287,6 +289,7 @@ class MyTest(TestCase):
         assert b'Alphabet' in response.data
 
     def test_quote_get(self):
+        """Quote route renders quote page"""
         self.startSession()
         response = self.client.get('/quote')
         assert b'Quote' in response.data
@@ -371,8 +374,8 @@ class MyTest(TestCase):
         response = self.client.get('/register')
         assert b'Create a New Account' in response.data
 
-
     def test_sell_post(self):
+        """Sell route redirects to portfolio on success"""
         self.populateTestDb()
         self.startSession()
         response = self.client.post('/sell', data={
@@ -382,6 +385,7 @@ class MyTest(TestCase):
         assert b'Your Portfolio' in response.data
 
     def test_sell_get(self):
+        """Sell route renders sell page"""
         self.populateTestDb()
         self.startSession()
         response = self.client.get('/sell')
