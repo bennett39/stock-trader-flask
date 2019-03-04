@@ -2,8 +2,9 @@ sudo: false
 language: python
 python:
   - 3.6
-env:
-  - SECRET_KEY="$eCR3tk3y" CODECOV_TOKEN="daf8baef-fc96-41da-a404-6a44430114c2"
+global:
+  - SECRET_KEY="wl}^RKh6V_2!iPiFum#e"
+  - CODECOV_TOKEN="daf8baef-fc96-41da-a404-6a44430114c2"
 install:
   - pip install --upgrade pip
   - pip install -r requirements.txt
