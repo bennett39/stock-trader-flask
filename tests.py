@@ -219,40 +219,11 @@ class MyTest(TestCase):
 
     ### application.py ###
     def startSession(self):
+        """Initialize a user session for login_required routes"""
         with self.client.session_transaction() as sess:
             sess['user_id'] = 1
             sess.modified = True
             assert 'user_id' in sess
-
-    def test_login_page(self):
-        """Login route renders the login page"""
-        response = self.client.get('/login')
-        assert b'Log In' in response.data
-
-    def test_register_page(self):
-        """Register route renders register page"""
-        response = self.client.get('/register')
-        assert b'Create a New Account' in response.data
-
-    def test_logout(self):
-        """Logout clears the session"""
-        self.startSession()
-        self.client.get('/logout', follow_redirects=True)
-        with self.client.session_transaction() as sess:
-            assert 'user_id' not in sess
-
-    def test_login(self):
-        """Login sucessful and redirect to home page"""
-        self.populateTestDb()
-        response = self.client.post(
-            '/login', data={
-                'username': 'user',
-                'password': 'test',
-            },
-            follow_redirects=True,
-        )
-        print(response.data)
-        assert b'Your Portfolio' in response.data
 
     def test_buy_post(self):
         """User can buy a new stock"""
@@ -320,13 +291,86 @@ class MyTest(TestCase):
         response = self.client.get('/quote')
         assert b'Quote' in response.data
 
+    def test_login_post(self):
+        """Login sucessful and redirect to home page"""
+        self.populateTestDb()
+        response = self.client.post(
+            '/login', data={
+                'username': 'user',
+                'password': 'test',
+            },
+            follow_redirects=True,
+        )
+        print(response.data)
+        assert b'Your Portfolio' in response.data
+
+    def test_login_error_username(self):
+        """Error generated when user doesn't exist"""
+        response = self.client.post('/login', data={
+            'username': 'incorrect',
+            'password': 'incorrect',
+            }, follow_redirects=True)
+        assert b'No such user' in response.data
+
+    def test_login_get(self):
+        """Login route renders the login page"""
+        response = self.client.get('/login')
+        assert b'Log In' in response.data
+
+    def test_logout(self):
+        """Logout clears the session"""
+        self.startSession()
+        self.client.get('/logout', follow_redirects=True)
+        with self.client.session_transaction() as sess:
+            assert 'user_id' not in sess
+
     def test_register_post(self):
+        """Creates a new user in the database"""
         response = self.client.post('/register', data={
             'username': 'new',
             'password': 'foo',
             'confirmation': 'foo',
             }, follow_redirects=True)
         assert q.select_user_by_username('new').id == 1
+
+    def test_register_error_username(self):
+        """Renders error when no username provided"""
+        response = self.client.post('/register', data={
+            'password': 'foo',
+            'confirmation': 'foo',
+            }, follow_redirects=True)
+        assert b'Missing username' in response.data
+
+    def test_register_error_password(self):
+        """Renders error when no password provided"""
+        response = self.client.post('/register', data={
+            'username': 'new',
+            'confirmation': 'foo',
+            }, follow_redirects=True)
+        assert b'Missing password' in response.data
+
+    def test_register_error_confirmation(self):
+        """Renders error when no confirmation provided"""
+        response = self.client.post('/register', data={
+            'username': 'new',
+            'password': 'foo',
+            }, follow_redirects=True)
+        assert b'Missing confirmation' in response.data
+
+    def test_register_error_password_match(self):
+        """Renders error when password and confirmation don't match"""
+        response = self.client.post('/register', data={
+            'username': 'new',
+            'password': 'foo',
+            'confirmation': 'bar',
+            }, follow_redirects=True)
+        assert b'match confirmation' in response.data
+
+    def test_register_get(self):
+        """Register route renders register page"""
+        response = self.client.get('/register')
+        assert b'Create a New Account' in response.data
+
 
     def test_sell_post(self):
         self.populateTestDb()
@@ -342,4 +386,3 @@ class MyTest(TestCase):
         self.startSession()
         response = self.client.get('/sell')
         assert b'Sell Stocks' in response.data
-
