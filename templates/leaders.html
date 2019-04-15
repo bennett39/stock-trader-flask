@@ -6,14 +6,22 @@
 
 {% block main %}
     <h1>Leader Board</h1>
-    <table>
-      <tbody>
-        {% for leader in leaders %}
-        <tr>
-          <td>{{ leader[0] }}</td>
-          <td>{{ leader[1] }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <div class="table-responsive table-hover">
+      <table class="table table-sm">
+        <thead class="thead-light">
+          <tr>
+            <th>User</th>
+            <th>Porfolio Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for leader in leaders %}
+          <tr>
+            <td>{{ leader[0] }}</td>
+            <td>{{ leader[1] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
 {% endblock %}
