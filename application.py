@@ -77,6 +77,21 @@ def history():
     return render_template('history.html', history=history)
 
 
+@app.route('/leaders')
+@login_required
+def leaders():
+    """Show leader board"""
+    users = q.select_all_users()
+    leaders = []
+    for user in users:
+        portfolio = h.build_portfolio(
+            q.select_stocks_by_user(user.id),
+            user.cash)
+        leaders.append((user.username, portfolio['total']))
+    leaders.sort(reverse=True, key=lambda x: x[1])
+    return render_template('leaders.html', leaders=leaders)
+
+
 @app.route('/login', methods=['GET','POST'])
 def login():
     """Log user in"""

@@ -31,6 +31,10 @@ def insert_user(username, password_hash):
     db.session.add(user)
     db.session.commit()
 
+def select_all_users():
+    """Get all users"""
+    return User.query.all()
+
 def select_user_by_id(user_id):
     """Get user object where id"""
     return User.query.filter_by(id=user_id).first()

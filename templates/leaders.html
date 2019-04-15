@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Leader Board
+{% endblock %}
+
+{% block main %}
+    <h1>Leader Board</h1>
+    <table>
+      <tbody>
+        {% for leader in leaders %}
+        <tr>
+          <td>{{ leader[0] }}</td>
+          <td>{{ leader[1] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+{% endblock %}
