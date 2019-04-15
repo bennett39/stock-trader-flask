@@ -89,7 +89,7 @@ def leaders():
             user.cash)
         leaders.append((user.username, portfolio['total']))
     leaders.sort(reverse=True, key=lambda x: x[1])
-    return render_template('leaders.html', leaders=leaders)
+    return render_template('leaders.html', leaders=leaders[:11])
 
 
 @app.route('/login', methods=['GET','POST'])
