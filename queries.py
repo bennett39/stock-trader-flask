@@ -4,6 +4,7 @@ from sqlalchemy.sql import func
 
 
 def delete_transactions_by_user(user_id):
+    """ Delete all a user's transactions to reset their portfolio """
     transactions = Transaction.query.filter(
             Transaction.user_id==user_id
             ).all()
@@ -12,11 +13,13 @@ def delete_transactions_by_user(user_id):
     db.session.commit()
 
 def insert_stock(symbol, name):
+    """ Add a new stock to the database """
     stock = Stock(symbol=symbol, name=name)
     db.session.add(stock)
     db.session.commit()
 
 def insert_transaction(user_id, stock_id, quantity, price):
+    """ Add a new transaction (buy or sell) """
     transaction = Transaction(user_id=user_id, stock_id=stock_id,
             quantity=quantity, price=price)
     db.session.add(transaction)
@@ -69,18 +72,20 @@ def select_transactions_by_stock(stock_id, user_id):
     return (db.session.query(
                 func.sum(Transaction.quantity).label('shares')
             ).group_by(
-                Transaction.stock_id    
+                Transaction.stock_id
             ).filter(
                 Transaction.stock_id == stock_id,
                 Transaction.user_id == user_id
             ).one())
 
 def update_user_cash(change, user_id):
+    """ Change user cash after buy or sell """
     user = select_user_by_id(user_id)
     user.cash = user.cash + change
     db.session.commit()
 
 def update_user_hash(new_hash, user_id):
+    """ Update the user's password hash on password reset """
     user = select_user_by_id(user_id)
     user.password_hash = new_hash
     db.session.commit()
