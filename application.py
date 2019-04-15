@@ -84,11 +84,17 @@ def leaders():
     users = q.select_all_users()
     leaders = []
     for user in users:
-        portfolio = h.build_portfolio(
-            q.select_stocks_by_user(user.id),
-            user.cash)
-        leaders.append((user.username, portfolio['total']))
+        total = user.cash
+        stocks = q.select_stocks_by_user(user.id)
+        for stock in stocks:
+            if stock.quantity > 0:
+                price = h.lookup(stock.symbol)['price']
+                total += stock.quantity * price
+        leaders.append([user.username, total])
     leaders.sort(reverse=True, key=lambda x: x[1])
+    leaders = leaders[:10]
+    for i in range(len(leaders)):
+        leaders[i][1] = h.usd(leaders[i][1])
     return render_template('leaders.html', leaders=leaders[:11])
 
 
